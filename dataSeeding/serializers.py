@@ -21,7 +21,12 @@ class Operational_StatusSerializer(serializers.ModelSerializer):
         model = Operational_Status
         fields = '__all__'
         
-class ElevatorRequestTypeSerializer(serializers.ModelSerializer):
+# class ElevatorRequestTypeSerializer(serializers.ModelSerializer):
+#     class Meta: 
+#         model = ElevatorRequestType
+#         fields = '__all__'
+
+class ElevatorRequestStatusSerializer(serializers.ModelSerializer):
     class Meta: 
-        model = ElevatorRequestType
+        model = ElevatorRequestStatus
         fields = '__all__'

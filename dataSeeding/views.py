@@ -19,6 +19,10 @@ class DataSeedingViewsOperational_Status(viewsets.ReadOnlyModelViewSet):
     queryset = Operational_Status.objects.all()
     serializer_class = Operational_StatusSerializer
     
-class DataSeedingViewsElevatorRequestType(viewsets.ReadOnlyModelViewSet):
-    queryset = ElevatorRequestType.objects.all()
-    serializer_class = ElevatorRequestTypeSerializer
+# class DataSeedingViewsElevatorRequestType(viewsets.ReadOnlyModelViewSet):
+#     queryset = ElevatorRequestType.objects.all()
+#     serializer_class = ElevatorRequestTypeSerializer
+    
+class DataSeedingViewsElevatorRequestStatus(viewsets.ReadOnlyModelViewSet):
+    queryset = ElevatorRequestStatus.objects.all()
+    serializer_class = ElevatorRequestStatusSerializer

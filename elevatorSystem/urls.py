@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dataSeeding/', include('dataSeeding.urls')),
+    path('elevator/', include('elevator.urls')),
 ]

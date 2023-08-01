@@ -1,0 +1,7 @@
+errorResponse = {
+    "Message" : ""
+}
+
+successResponse = {
+    "Message": ""
+}

@@ -11,13 +11,13 @@ def deleteModelData(model, name):
         # print("Data after: ")
         # print(Movements.objects.all())
 
-
 def deleteAllDataFromAllModels():
     deleteModelData(Movements, "Movements")
     deleteModelData(DoorFunctions, "DoorFunctions")
     deleteModelData(Moving, "Moving")
     deleteModelData(Operational_Status, "Operational_Status")
-    deleteModelData(ElevatorRequestType, "ElevatorRequestType")
+    # deleteModelData(ElevatorRequestType, "ElevatorRequestType")
+    deleteModelData(ElevatorRequestStatus, "ElevatorRequestStatus")
 
 def addMovements():
     print("Adding Movements !")
@@ -101,19 +101,35 @@ def addOperational_Status():
         if not Operational_Status.objects.filter(value = val).exists():
             opr = Operational_Status.objects.create(value = val)
 
-def addElevatorRequestType():
-    print("Adding ElevatorRequestType !")
+# def addElevatorRequestType():
+#     print("Adding ElevatorRequestType !")
+#     objects = [
+#         {
+#             "val": "forElevator",
+#         },
+#         {
+#             "val": "fromElevator",
+#         },
+#     ]
+
+#     for obj in objects:
+#         val = obj["val"]
+#         if not ElevatorRequestType.objects.filter(name = val).exists():
+#             opr = ElevatorRequestType.objects.create(name = val)
+            
+def addElevatorRequestStatus():
+    print("Adding ElevatorRequestStatus !")
     objects = [
         {
-            "val": "forElevator",
+            "val": "open",
         },
         {
-            "val": "fromElevator",
+            "val": "closed",
         },
     ]
 
     for obj in objects:
         val = obj["val"]
-        if not ElevatorRequestType.objects.filter(name = val).exists():
-            opr = ElevatorRequestType.objects.create(name = val)
+        if not ElevatorRequestStatus.objects.filter(name = val).exists():
+            opr = ElevatorRequestStatus.objects.create(name = val)
             
