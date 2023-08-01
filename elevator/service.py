@@ -67,9 +67,47 @@ def list_forRequests(data):
 
     elevator = Elevator.objects.get(name=elevator)
     req_list = ElevatorForRequests.objects.filter(
-        Q(elevator=elevator) & 
-        Q(reqTime__gt=of_date) & 
+        Q(elevator=elevator) &
+        Q(reqTime__gt=of_date) &
         Q(reqTime__lt=next_date)
     )
 
     return req_list
+
+
+def list_elevFuncMoving(data):
+    return ElevatorFunctionality.objects.get(
+        elevator=data["elevator"],
+    )
+
+
+def create_elevFuncOperational(data):
+    oprStatus = Operational_Status.objects.get(
+        value=data["status"]
+    )
+
+    print("opr: " + str(oprStatus))
+    elevFunc = ElevatorFunctionality.objects.get(
+        elevator=data["elevator"],
+    )
+
+    elevFunc.operational_status = oprStatus
+    elevFunc.save()
+
+    return elevFunc
+
+def create_elevFuncDoor(data):
+    doorFunc = DoorFunctions.objects.get(
+        name=data["action"],
+    )
+
+    elevFunc = ElevatorFunctionality.objects.get(
+        elevator=data["elevator"],
+    )
+
+    print(doorFunc)
+    print(elevFunc)
+
+    elevFunc.door_functionality = doorFunc
+    elevFunc.save()
+    return elevFunc
