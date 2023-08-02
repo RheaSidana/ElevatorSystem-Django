@@ -28,18 +28,12 @@ def create_elevators(data):
             ele = Elevator.objects.create(
                 name=val, capacity=cap, requestsCapacity=reqCap,
             )
-            print("elevator : ")
-            print(ele)
             ele_func = defaut_ElevatorFunctionality(ele)
-            print("Elevator Functionality: ")
-            print(ele_func)
 
 
 def create_forRequest(data):
     status = ElevatorRequestStatus.objects.get(name="open")
-    # print(status)
     list_of_elevators = findAllElevators()
-    # print(list_of_elevators)
     if is_allAtTheSameFloor(list_of_elevators):
         assignForRequestWhenAllAtSameFloor(
             list_of_elevators, data, status
@@ -51,8 +45,6 @@ def create_forRequest(data):
                     1. check in fromRequest
                 modify data and return 
         """
-        print("elevator")
-        print(list_of_elevators)
         assignForRequestToTheNearestElevatorPossible(
             list_of_elevators, data, status
         )
@@ -86,7 +78,6 @@ def create_elevFuncOperational(data):
         value=data["status"]
     )
 
-    print("opr: " + str(oprStatus))
     elevFunc = ElevatorFunctionality.objects.get(
         elevator=data["elevator"],
     )
@@ -95,6 +86,7 @@ def create_elevFuncOperational(data):
     elevFunc.save()
 
     return elevFunc
+
 
 def create_elevFuncDoor(data):
     doorFunc = DoorFunctions.objects.get(
@@ -105,9 +97,46 @@ def create_elevFuncDoor(data):
         elevator=data["elevator"],
     )
 
-    print(doorFunc)
-    print(elevFunc)
-
     elevFunc.door_functionality = doorFunc
     elevFunc.save()
     return elevFunc
+
+
+def create_fromRequest(data):
+    status = ElevatorRequestStatus.objects.get(name="open")
+
+    try:
+        list = assignFromRequest(status, data)
+    except Exception as e:
+        raise Exception(str(e))
+    return list
+
+
+def list_fromRequests(data):
+    elevator = data["elevator"]
+    of_date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+    of_date = datetime.combine(of_date, datetime.min.time())
+    of_date = timezone.make_aware(of_date, timezone.utc)
+    next_date = of_date + timezone.timedelta(days=1)
+
+    elevator = Elevator.objects.get(name=elevator)
+    req_list = ElevatorFromRequests.objects.filter(
+        Q(elevator=elevator) &
+        Q(reqTime__gt=of_date) &
+        Q(reqTime__lt=next_date)
+    )
+
+    return req_list
+
+
+def list_nextDestination(data):
+    elevator = data["elevator"]
+    elevator = Elevator.objects.get(name=elevator)
+    status = ElevatorRequestStatus.objects.get(name="open")
+
+    list_req = findListOfReq(status=status, elevator=elevator)
+    try:
+        obj = segregateAccordingToDirection(elevator, sorted(list_req))
+    except Exception as ex:
+        raise Exception(ex)
+    return obj

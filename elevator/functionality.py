@@ -18,23 +18,27 @@ def defaut_ElevatorFunctionality(elevator):
 def findAllElevators():
     return ElevatorFunctionality.objects.all().order_by("id")
 
-# not in use yet
-
 
 def findAllOpenForRequest(status, elevator):
     list_elev = ElevatorForRequests.objects.filter(
-        # status=status,
+        status=status,
         elevator=elevator
     )
     return list_elev
 
-# not in use yet
+
+def findAllOpenFromRequestFloor(status, elevator, to_floor):
+    return ElevatorFromRequests.objects.filter(
+        status=status,
+        elevator=elevator,
+        to_floor=to_floor
+    )
 
 
 def findAllOpenFromRequest(status, elevator):
     return ElevatorFromRequests.objects.filter(
         status=status,
-        elevator=elevator
+        elevator=elevator,
     )
 
 
@@ -112,11 +116,6 @@ def assignForRequestWhenAllAtSameFloor(list_of_elevators, data, status):
 
 
 def findMinDiff(elevator, floor_no, bufferCount, min, openReq=0):
-    print("\nin nearest\n")
-    # if ElevatorForRequests.objects.exists():
-    #     count = ElevatorForRequests.objects.count() + 1
-    # else:
-    #     count = 1
 
     if (elevator.curr_req_count >= elevator.elevator.requestsCapacity):
         return None
@@ -125,17 +124,10 @@ def findMinDiff(elevator, floor_no, bufferCount, min, openReq=0):
         if (bufferCount == elev.capacity):
             return None
         else:
-            print("dfhdjfnhdf")
-            print("elev: " + elev.name)
-            print("openReq: " + str(len(openReq)))
             if not openReq or (openReq and len(openReq) < elev.requestsCapacity):
                 floorNo_req = int(floor_no.split("_")[1])
                 floorNo_elev = int(elevator.floor_no.name.split("_")[1])
-                print("elevator floor: " + elevator.floor_no.name)
-                print(floorNo_elev)
-                print("req floor: " + floor_no)
-                print(floorNo_req)
-                print("diff: " + str(abs(floorNo_req-floorNo_elev)))
+
                 if min > abs(floorNo_req - floorNo_elev):
                     min = floorNo_req - floorNo_elev
 
@@ -155,19 +147,14 @@ def forRequestToElevator(elevator, floor_no, people_count, status, bufferCount):
         count = ElevatorForRequests.objects.count() + 1
     else:
         count = 1
-    
-    print("req count" + str(count))
 
     if (elevator.curr_req_count >= elevator.elevator.requestsCapacity):
         bufferCount = 0
-        print("in cap")
         return people_count, bufferCount
     else:
-        print("is cap"  )
         elev = elevator.elevator
         if (bufferCount == elevator.elevator.capacity):
             bufferCount = 0
-            print("in people")
             return people_count
         else:
             floor = Floor.objects.get(name=floor_no)
@@ -182,12 +169,10 @@ def forRequestToElevator(elevator, floor_no, people_count, status, bufferCount):
 
         if (bufferCount + people_count <= elev.capacity):
             bufferCount += people_count
-            # print("in <=")
             people_count = 0
 
         else:
             add = (elev.capacity-bufferCount)
-            print("cap-bufferCount")
             bufferCount = 0
             people_count -= add
             forReq.count_of_people = add
@@ -202,10 +187,9 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators, data, status
     count = ElevatorFunctionality.objects.count()
 
     buffCount = 0
-    i=0
+    i = 0
     expr = i < len(data["floors"])-1
     while expr:
-    # range(0, len(data["floors"])):
         minDiff = count
         minElev = None
 
@@ -239,9 +223,146 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators, data, status
             bufferCount=buffCount,
         )
 
-        print("People Count: "+ str(peopleCount))
-        print("i: "+ str(i))
         if peopleCount != 0:
             data["PeoplePerFloor"][i] = peopleCount
-        else: 
+        else:
             i += 1
+
+
+def fromRequest(from_floor, elevator, to_floor, status):
+    count = ElevatorFromRequests.objects.count()+1
+    if count is None:
+        count = 1
+
+    req_id = "EFR_"+str(count)
+
+    ElevatorFromRequests.objects.create(
+        reqID=req_id,
+        from_floor=from_floor,
+        to_floor=to_floor,
+        status=status,
+        elevator=elevator
+    )
+
+
+def assignFromRequest(status, data):
+    list_req = []
+    elevator = Elevator.objects.get(
+        name=data["elevator"]
+    )
+
+    elevFunc = ElevatorFunctionality.objects.get(
+        elevator=elevator
+    )
+
+    if elevFunc.floor_no.name != data["from_floor"]:
+        raise Exception(
+            "Invalid floor from the request is sent." +
+            " The elevator is not on that floor.")
+
+    for fl in data["to_floors"]:
+        floor = Floor.objects.get(
+            name=fl
+        )
+
+        list_fromReq = findAllOpenFromRequestFloor(
+            status=status,
+            elevator=elevator,
+            to_floor=floor
+        )
+        if not list_fromReq:
+            from_floor = Floor.objects.get(
+                name=data["from_floor"],
+            )
+            req = fromRequest(
+                from_floor=from_floor,
+                elevator=elevator,
+                to_floor=floor,
+                status=status
+            )
+            list_req.append(req)
+        else:
+            list_req += list_fromReq
+    return list_req
+
+
+def segregateAccordingToDirection(elevator, list_req):
+    elevFunc = ElevatorFunctionality.objects.get(
+        elevator=elevator
+    )
+
+    curr = elevFunc.floor_no.name
+    right_list = []
+    left_list = []
+
+    pop = ""
+    direct = Moving.objects.get(
+        direction="Stationary"
+    )
+    if list_req is not None:
+        for fl in list_req:
+            if fl > curr:
+                right_list.append(fl)
+            elif fl < curr:
+                left_list.append(fl)
+
+        left_list.sort(reverse=True)
+
+        min_diff = Elevator.objects.count()
+
+        if left_list != [] and abs(int(left_list[0].split("_")[1]) - int(curr.split("_")[1])) < min_diff:
+
+            min_diff = abs(int(left_list[0].split(
+                "_")[1]) - int(curr.split("_")[1]))
+            pop = left_list.pop(0)
+            direct = Moving.objects.get(
+                direction="Down"
+            )
+        elif right_list != []:
+            if pop != "" and abs(int(right_list[0].split("_")[1]) - int(curr.split("_")[1])) < min_diff:
+                left_list.insert(0, pop)
+                min_diff = abs(int(right_list[0].split(
+                    "_")[1]) - int(curr.split("_")[1]))
+                pop = right_list.pop(0)
+            else:
+                min_diff = abs(int(right_list[0].split(
+                    "_")[1]) - int(curr.split("_")[1]))
+                pop = right_list.pop(0)
+                direct = Moving.objects.get(
+                    direction="Up"
+                )
+
+    obj = {
+        "elevator_name": elevator.name,
+        "current_floor": curr,
+        "next_floor": pop,
+        "next_direction": direct.direction,
+        "moving_direction1": "Up",
+        "floor_names1": right_list,
+        "moving_direction2": "Down",
+        "floor_names2": left_list,
+    }
+
+    return obj
+
+
+def findListOfReq(status, elevator):
+    list_req = []
+
+    list_forReqs = findAllOpenForRequest(
+        status=status,
+        elevator=elevator
+    )
+
+    if list_forReqs is not None:
+        for fr in list_forReqs:
+            list_req.append(fr.floor_id.name)
+
+    list_fromReqs = findAllOpenFromRequest(
+        status=status,
+        elevator=elevator,
+    )
+
+    if list_fromReqs is not None:
+        for fr in list_fromReqs:
+            list_req.append(fr.to_floor.name)
