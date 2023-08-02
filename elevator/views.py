@@ -84,9 +84,7 @@ class RequestForElevatorViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            create_forRequest(data=data)
-            serializer = ElevatorForRequestsSerializer(
-                self.queryset, many=True)
+            list_req = create_forRequest(data=data)
         except Exception as ex:
             return Response({
                 "status": 500,
@@ -94,6 +92,8 @@ class RequestForElevatorViewSet(viewsets.ModelViewSet):
                 "error": ex,
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        serializer = ElevatorForRequestsSerializer(
+                list_req, many=True)
         return Response({
             "status": 201,
             "Requests": serializer.data
@@ -272,11 +272,13 @@ class RequestFromElevatorViewSet(viewsets.ModelViewSet):
 
     """
     requestbody = {
-        "from_floors": ["FL_2", "FL_4"],
-        "elevators": ["EL_", "EL_"],
+        "from_floors": "FL_2",
+        "elevators": "EL_1",
         "to_floors": [
-            ["FL_1", "FL_5"],
-            ["FL_1"]
+            "FL_1", "FL_5"
+        ],
+        "PeoplePerFloor": [
+            2,1
         ]
     }
     """
@@ -354,8 +356,6 @@ class AllRequestsFromElevatorViewSet(viewsets.ModelViewSet):
 
 
 class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
-    # queryset = ElevatorFromRequests.objects.all()
-    # serializer_class = ElevatorFromRequestsSerializer
 
     def list(self, request):
         data = request.data
@@ -389,6 +389,33 @@ class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
 
         serializer = ElevatorNextDestinationSerializer(
             reqList, many=False
+        )
+        return Response({
+            "status": 200,
+            "Requests": serializer.data
+        }, status=status.HTTP_200_OK)
+
+class FullFilElevatorNextRequestsViewSet(viewsets.ModelViewSet):
+    
+    def list(self, request):
+
+        try:
+            nextReq = list_fullfilElevatorNextRequest()
+
+            if not nextReq:
+                return Response({
+                    "status": 404,
+                    "message": "Data not Found",
+                }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as ex:
+            return Response({
+                "status": 500,
+                "message": "Internal Server Error, while accessing the DB.",
+                "error": str(ex),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = FullFilElevatorNextRequestsSerializer(
+            nextReq, many=True
         )
         return Response({
             "status": 200,

@@ -23,6 +23,8 @@ router.register(r'ElevatorAllFromRequest',
                 AllRequestsFromElevatorViewSet, basename="ElevatorAllFromRequest")
 router.register(r'ElevatorNextDestination',
                 ElevatorNextDestinationViewSet, basename="ElevatorNextDestination")
+router.register(r'FullFilElevatorNextRequests',
+                FullFilElevatorNextRequestsViewSet, basename="FullFilElevatorNextRequests")
 
 urlpatterns = [
 ]+router.urls

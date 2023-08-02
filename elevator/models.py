@@ -46,6 +46,7 @@ class ElevatorFromRequests(models.Model):
     # type = models.ForeignKey(ElevatorRequestType, on_delete=models.CASCADE, related_name="request")
     status = models.ForeignKey(ElevatorRequestStatus, on_delete=models.CASCADE, related_name="request_from_status")
     elevator = models.ForeignKey(Elevator, on_delete=models.CASCADE, related_name="request_from")
+    count_of_people = models.IntegerField(default=0)
 
     def __str__(self):
         return self.reqID

@@ -21,6 +21,4 @@ class Command(BaseCommand):
         print("\n ********* \n")
         addOperational_Status()
         print("\n ********* \n")
-        # addElevatorRequestType()
-        # print("\n ********* \n")
         addElevatorRequestStatus()

@@ -33,9 +33,10 @@ def create_elevators(data):
 
 def create_forRequest(data):
     status = ElevatorRequestStatus.objects.get(name="open")
-    list_of_elevators = findAllElevators()
+    list_of_elevators = findAllElevatorFunctions()
     if is_allAtTheSameFloor(list_of_elevators):
-        assignForRequestWhenAllAtSameFloor(
+        # list_forReq ElevatorForRequestsSerializer
+        list_forReq = assignForRequestWhenAllAtSameFloor(
             list_of_elevators, data, status
         )
     else:
@@ -45,9 +46,14 @@ def create_forRequest(data):
                     1. check in fromRequest
                 modify data and return 
         """
-        assignForRequestToTheNearestElevatorPossible(
+        data, list_forReq = assignForRequestIfElevatorAlreadyHasRequests(
             list_of_elevators, data, status
         )
+        if data != {}:
+            list_forReq = assignForRequestToTheNearestElevatorPossible(
+                list_of_elevators, data, status
+            )
+    return list_forReq
 
 
 def list_forRequests(data):
@@ -135,8 +141,31 @@ def list_nextDestination(data):
     status = ElevatorRequestStatus.objects.get(name="open")
 
     list_req = findListOfReq(status=status, elevator=elevator)
+
     try:
         obj = segregateAccordingToDirection(elevator, sorted(list_req))
     except Exception as ex:
         raise Exception(ex)
     return obj
+
+
+def list_fullfilElevatorNextRequest():
+    list_obj = []
+    elevFuncs = findAllElevatorFunctions()
+    # elevFunc = ElevatorFunctionality.objects.all().order_by("id")
+    data = dict()
+
+    for elevatorFunc in elevFuncs:
+        data["elevator"] = elevatorFunc.elevator.name
+
+        obj = list_nextDestination(data=data)
+        
+        ob = fullfil(
+            elevatorFunc = elevatorFunc,
+            nextDest = obj["next_floor"],
+            nextDir = obj["next_direction"],
+        )
+
+        list_obj.append(ob)
+
+    return list_obj

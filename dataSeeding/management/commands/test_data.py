@@ -46,10 +46,6 @@ class DataTestCase(TestCase):
         mock_Operational_Status.objects.count.return_value = 0
 
         mock_Movements.objects.all.delete.return_value = "Deleted"
-        # Movements.objects.create(action = "dummy")
-        # DoorFunctions.objects.create(name = "dummy")
-
-        print(mock_Movements.objects.count())
 
         self.assertNotEqual(mock_Movements.objects.count(), 0)
         self.assertNotEqual(mock_DoorFunctions.objects.count(), 0)

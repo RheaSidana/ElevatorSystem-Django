@@ -140,7 +140,7 @@ class ElevatorNextDestinationSerializer(serializers.Serializer):
     def get_floor_names2(self, obj):
         return obj.floor_names2 if hasattr(obj, "floor_names2") else []
 
-class FullFilElevatorRequestsSerializer(serializers.Serializer):
+class FullFilElevatorNextRequestsSerializer(serializers.Serializer):
     elevator_name = serializers.CharField()
     current_floor = serializers.CharField()
     fulfilled_floor = serializers.CharField()

@@ -15,7 +15,7 @@ def defaut_ElevatorFunctionality(elevator):
     )
 
 
-def findAllElevators():
+def findAllElevatorFunctions():
     return ElevatorFunctionality.objects.all().order_by("id")
 
 
@@ -229,7 +229,7 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators, data, status
             i += 1
 
 
-def fromRequest(from_floor, elevator, to_floor, status):
+def fromRequest(from_floor, elevator, to_floor, status, count_of_people):
     count = ElevatorFromRequests.objects.count()+1
     if count is None:
         count = 1
@@ -241,7 +241,8 @@ def fromRequest(from_floor, elevator, to_floor, status):
         from_floor=from_floor,
         to_floor=to_floor,
         status=status,
-        elevator=elevator
+        elevator=elevator, 
+        count_of_people = count_of_people
     )
 
 
@@ -250,6 +251,7 @@ def assignFromRequest(status, data):
     elevator = Elevator.objects.get(
         name=data["elevator"]
     )
+
 
     elevFunc = ElevatorFunctionality.objects.get(
         elevator=elevator
@@ -274,11 +276,13 @@ def assignFromRequest(status, data):
             from_floor = Floor.objects.get(
                 name=data["from_floor"],
             )
+            position = data["to_floors"].index(fl)
             req = fromRequest(
                 from_floor=from_floor,
                 elevator=elevator,
                 to_floor=floor,
-                status=status
+                status=status,
+                count_of_people = data["PeoplePerFloor"][position]
             )
             list_req.append(req)
         else:
@@ -354,7 +358,7 @@ def findListOfReq(status, elevator):
         elevator=elevator
     )
 
-    if list_forReqs is not None:
+    if list_forReqs != []:
         for fr in list_forReqs:
             list_req.append(fr.floor_id.name)
 
@@ -362,7 +366,206 @@ def findListOfReq(status, elevator):
         status=status,
         elevator=elevator,
     )
-
-    if list_fromReqs is not None:
+    if list_fromReqs != []:
         for fr in list_fromReqs:
             list_req.append(fr.to_floor.name)
+
+    return list_req
+
+
+def foundInFromRequest(floor_id, status, elevatorFunc, peopleCount, fromReq):
+    elev = elevatorFunc.elevator
+    if (elevatorFunc.curr_req_count == elev.requestsCapacity):
+        return peopleCount
+    # curr_person_count = models.IntegerField()
+    else:
+        if ElevatorForRequests.objects.exists():
+            count = ElevatorForRequests.objects.count() + 1
+        else:
+            count = 1
+        floor = Floor.objects.get(name=floor_id)
+        req_id = "FR_" + str(count)
+        forReq = ElevatorForRequests.objects.create(
+            reqID=req_id,
+            floor_id=floor,
+            status=status,
+            elevator=elev,
+            count_of_people=peopleCount
+        )
+        bufferCount = elevatorFunc.curr_person_count - fromReq.count_of_people
+        if (bufferCount + peopleCount <= elev.requestsCapacity):
+            peopleCount = 0
+        else:
+            add = (elev.requestsCapacity - bufferCount)
+            peopleCount -= add
+            forReq.count_of_people = add
+
+        elevatorFunc.curr_req_count += 1
+        elevatorFunc.save()
+        forReq.save()
+    return peopleCount
+
+
+def assignForRequestIfElevatorAlreadyHasRequests(list_of_elevators, data, status):
+
+    for elevatorFunc in list_of_elevators:
+        elevator = elevatorFunc.elevator
+        list_fromReqs = findAllOpenFromRequest(
+            status=status,
+            elevator=elevator,
+        )
+
+        for req in list_fromReqs:
+
+            if req.to_floor in data["floors"]:
+                position = data["floors"].index(req)
+                peopleCount = data["PeoplePerFloor"][position]
+
+                peopleCount = foundInFromRequest(
+                    floor_id=req.to_floor,
+                    status=status,
+                    elevatorFunc=elevatorFunc,
+                    peopleCount=peopleCount,
+                    fromReq=req,
+                )
+
+                if peopleCount != 0:
+                    data["PeoplePerFloor"][position] = peopleCount
+                else:
+                    data["floors"].pop(position)
+                    data["PeoplePerFloor"].pop(position)
+
+    return data
+
+
+def closeForRequest(elevator, floor):
+    openReq = ElevatorRequestStatus.objects.get(
+        name="open"
+    )
+    closeReq = ElevatorRequestStatus.objects.get(
+        name="closed"
+    )
+    ElevatorForRequests.objects.filter(
+        elevator=elevator,
+        floor_id=floor,
+        status=openReq
+    ).update(
+        status=closeReq
+    )
+
+
+def closeFromRequest(elevator, to_floor):
+    openReq = ElevatorRequestStatus.objects.get(
+        name="open"
+    )
+    closeReq = ElevatorRequestStatus.objects.get(
+        name="closed"
+    )
+    ElevatorFromRequests.objects.filter(
+        elevator=elevator,
+        to_floor=to_floor,
+        status=openReq
+    ).update(
+        status=closeReq
+    )
+
+
+def fullfil(elevatorFunc, nextDest, nextDir):
+    fulFilled = None
+    steps = []
+    if nextDest == "":
+        movement = Movements.objects.get(
+            action="Stop"
+        )
+
+        if elevatorFunc.movement != movement:
+            elevatorFunc.movement = movement
+        step = "Movement: " + elevatorFunc.movement.action
+        steps.append(step)
+        
+        direction = Moving.objects.get(
+            direction="Stationary"
+        )
+
+        if elevatorFunc.direction != direction:
+            elevatorFunc.direction = direction
+        step = "Moving: " + elevatorFunc.direction.direction
+        steps.append(step)
+        step = "From floor: " + elevatorFunc.floor_no.name
+        steps.append(step)
+        
+        doorClose = DoorFunctions.objects.get(
+            name="Close"
+        )
+
+        if elevatorFunc.door_functionality != doorClose:
+            elevatorFunc.door_functionality = doorClose
+        step = "Door : " + elevatorFunc.door_functionality.name
+        steps.append(step)
+
+
+    elif elevatorFunc.operational_status.value != "Maintainence" or elevatorFunc.operational_status.value != "Non Operational":
+        movement = Movements.objects.get(
+            action="Running"
+        )
+
+        if elevatorFunc.movement != movement:
+            elevatorFunc.movement = movement
+        step = "Movement: " + elevatorFunc.movement.action
+        steps.append(step)
+
+        direction = Moving.objects.get(
+            direction=nextDir
+        )
+
+        if elevatorFunc.direction != direction:
+            elevatorFunc.direction = direction
+        step = "Moving: " + elevatorFunc.direction.direction
+        steps.append(step)
+        step = "From floor: " + elevatorFunc.floor_no.name
+        steps.append(step)
+
+        floor = Floor.objects.get(
+            name=nextDest
+        )
+
+        if elevatorFunc.floor_no != floor:
+            elevatorFunc.floor_no = floor
+        step = "Reached Floor: " + elevatorFunc.floor_no.name
+        steps.append(step)
+        fulFilled = elevatorFunc.floor_no.name
+
+        doorOpen = DoorFunctions.objects.get(
+            name="Open"
+        )
+
+        if elevatorFunc.door_functionality != doorOpen:
+            elevatorFunc.door_functionality = doorOpen
+        step = "Door : " + elevatorFunc.door_functionality.name
+        steps.append(step)
+
+        doorClose = DoorFunctions.objects.get(
+            name="Close"
+        )
+
+        if elevatorFunc.door_functionality != doorClose:
+            elevatorFunc.door_functionality = doorClose
+        step = "Door : " + elevatorFunc.door_functionality.name
+        steps.append(step)
+
+        closeForRequest(elevator=elevatorFunc.elevator,
+                            floor=elevatorFunc.floor_no)
+        steps.append("Closed ForRequests")
+        closeFromRequest(elevator=elevatorFunc.elevator,
+                             to_floor=elevatorFunc.floor_no)
+        steps.append("Closed FromRequests")
+
+        steps.append("Ready for next direction !!")
+    elevatorFunc.save()
+
+    return {
+        "elevator_name": elevatorFunc.elevator.name,
+        "current_floor": elevatorFunc.floor_no.name,
+        "fulfilled_floor": fulFilled,
+        "steps": steps,
+    }
