@@ -1,30 +1,9 @@
-from .models import *
-import math
-
-
-def defaut_ElevatorFunctionality(elevator):
-    return ElevatorFunctionality.objects.create(
-        movement=Movements.objects.get(action="Stop"),
-        floor_no=Floor.objects.get(name="FL_1"),
-        direction=Moving.objects.get(direction="Stationary"),
-        operational_status=Operational_Status.objects.get(value="Working"),
-        door_functionality=DoorFunctions.objects.get(name="Close"),
-        elevator=elevator,
-        curr_req_count=0,
-        curr_person_count=0,
-    )
-
-
-def findAllElevatorFunctions():
-    return ElevatorFunctionality.objects.all().order_by("id")
+from .models.models import *
+from .modules.functionality import *
 
 
 def findAllOpenForRequest(status, elevator):
-    list_elev = ElevatorForRequests.objects.filter(
-        status=status,
-        elevator=elevator
-    )
-    return list_elev
+    return get_ElevatorForRequests(status=status,elevator=elevator) 
 
 
 def findAllOpenFromRequestFloor(status, elevator, to_floor):
@@ -290,87 +269,9 @@ def assignFromRequest(status, data):
     return list_req
 
 
-def segregateAccordingToDirection(elevator, list_req):
-    elevFunc = ElevatorFunctionality.objects.get(
-        elevator=elevator
-    )
-
-    curr = elevFunc.floor_no.name
-    right_list = []
-    left_list = []
-
-    pop = ""
-    direct = Moving.objects.get(
-        direction="Stationary"
-    )
-    if list_req is not None:
-        for fl in list_req:
-            if fl > curr:
-                right_list.append(fl)
-            elif fl < curr:
-                left_list.append(fl)
-
-        left_list.sort(reverse=True)
-
-        min_diff = Elevator.objects.count()
-
-        if left_list != [] and abs(int(left_list[0].split("_")[1]) - int(curr.split("_")[1])) < min_diff:
-
-            min_diff = abs(int(left_list[0].split(
-                "_")[1]) - int(curr.split("_")[1]))
-            pop = left_list.pop(0)
-            direct = Moving.objects.get(
-                direction="Down"
-            )
-        elif right_list != []:
-            if pop != "" and abs(int(right_list[0].split("_")[1]) - int(curr.split("_")[1])) < min_diff:
-                left_list.insert(0, pop)
-                min_diff = abs(int(right_list[0].split(
-                    "_")[1]) - int(curr.split("_")[1]))
-                pop = right_list.pop(0)
-            else:
-                min_diff = abs(int(right_list[0].split(
-                    "_")[1]) - int(curr.split("_")[1]))
-                pop = right_list.pop(0)
-                direct = Moving.objects.get(
-                    direction="Up"
-                )
-
-    obj = {
-        "elevator_name": elevator.name,
-        "current_floor": curr,
-        "next_floor": pop,
-        "next_direction": direct.direction,
-        "moving_direction1": "Up",
-        "floor_names1": right_list,
-        "moving_direction2": "Down",
-        "floor_names2": left_list,
-    }
-
-    return obj
 
 
-def findListOfReq(status, elevator):
-    list_req = []
 
-    list_forReqs = findAllOpenForRequest(
-        status=status,
-        elevator=elevator
-    )
-
-    if list_forReqs != []:
-        for fr in list_forReqs:
-            list_req.append(fr.floor_id.name)
-
-    list_fromReqs = findAllOpenFromRequest(
-        status=status,
-        elevator=elevator,
-    )
-    if list_fromReqs != []:
-        for fr in list_fromReqs:
-            list_req.append(fr.to_floor.name)
-
-    return list_req
 
 
 def foundInFromRequest(floor_id, status, elevatorFunc, peopleCount, fromReq):
@@ -438,134 +339,9 @@ def assignForRequestIfElevatorAlreadyHasRequests(list_of_elevators, data, status
     return data
 
 
-def closeForRequest(elevator, floor):
-    openReq = ElevatorRequestStatus.objects.get(
-        name="open"
-    )
-    closeReq = ElevatorRequestStatus.objects.get(
-        name="closed"
-    )
-    ElevatorForRequests.objects.filter(
-        elevator=elevator,
-        floor_id=floor,
-        status=openReq
-    ).update(
-        status=closeReq
-    )
 
 
-def closeFromRequest(elevator, to_floor):
-    openReq = ElevatorRequestStatus.objects.get(
-        name="open"
-    )
-    closeReq = ElevatorRequestStatus.objects.get(
-        name="closed"
-    )
-    ElevatorFromRequests.objects.filter(
-        elevator=elevator,
-        to_floor=to_floor,
-        status=openReq
-    ).update(
-        status=closeReq
-    )
 
 
-def fullfil(elevatorFunc, nextDest, nextDir):
-    fulFilled = None
-    steps = []
-    if nextDest == "":
-        movement = Movements.objects.get(
-            action="Stop"
-        )
-
-        if elevatorFunc.movement != movement:
-            elevatorFunc.movement = movement
-        step = "Movement: " + elevatorFunc.movement.action
-        steps.append(step)
-        
-        direction = Moving.objects.get(
-            direction="Stationary"
-        )
-
-        if elevatorFunc.direction != direction:
-            elevatorFunc.direction = direction
-        step = "Moving: " + elevatorFunc.direction.direction
-        steps.append(step)
-        step = "From floor: " + elevatorFunc.floor_no.name
-        steps.append(step)
-        
-        doorClose = DoorFunctions.objects.get(
-            name="Close"
-        )
-
-        if elevatorFunc.door_functionality != doorClose:
-            elevatorFunc.door_functionality = doorClose
-        step = "Door : " + elevatorFunc.door_functionality.name
-        steps.append(step)
 
 
-    elif elevatorFunc.operational_status.value != "Maintainence" or elevatorFunc.operational_status.value != "Non Operational":
-        movement = Movements.objects.get(
-            action="Running"
-        )
-
-        if elevatorFunc.movement != movement:
-            elevatorFunc.movement = movement
-        step = "Movement: " + elevatorFunc.movement.action
-        steps.append(step)
-
-        direction = Moving.objects.get(
-            direction=nextDir
-        )
-
-        if elevatorFunc.direction != direction:
-            elevatorFunc.direction = direction
-        step = "Moving: " + elevatorFunc.direction.direction
-        steps.append(step)
-        step = "From floor: " + elevatorFunc.floor_no.name
-        steps.append(step)
-
-        floor = Floor.objects.get(
-            name=nextDest
-        )
-
-        if elevatorFunc.floor_no != floor:
-            elevatorFunc.floor_no = floor
-        step = "Reached Floor: " + elevatorFunc.floor_no.name
-        steps.append(step)
-        fulFilled = elevatorFunc.floor_no.name
-
-        doorOpen = DoorFunctions.objects.get(
-            name="Open"
-        )
-
-        if elevatorFunc.door_functionality != doorOpen:
-            elevatorFunc.door_functionality = doorOpen
-        step = "Door : " + elevatorFunc.door_functionality.name
-        steps.append(step)
-
-        doorClose = DoorFunctions.objects.get(
-            name="Close"
-        )
-
-        if elevatorFunc.door_functionality != doorClose:
-            elevatorFunc.door_functionality = doorClose
-        step = "Door : " + elevatorFunc.door_functionality.name
-        steps.append(step)
-
-        closeForRequest(elevator=elevatorFunc.elevator,
-                            floor=elevatorFunc.floor_no)
-        steps.append("Closed ForRequests")
-        closeFromRequest(elevator=elevatorFunc.elevator,
-                             to_floor=elevatorFunc.floor_no)
-        steps.append("Closed FromRequests")
-
-        steps.append("Ready for next direction !!")
-    elevatorFunc.save()
-
-    return {
-        "elevator_name": elevatorFunc.elevator.name,
-        "current_floor": elevatorFunc.floor_no.name,
-        "fulfilled_floor": fulFilled,
-        "steps": steps,
-    }

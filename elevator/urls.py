@@ -26,5 +26,4 @@ router.register(r'ElevatorNextDestination',
 router.register(r'FullFilElevatorNextRequests',
                 FullFilElevatorNextRequestsViewSet, basename="FullFilElevatorNextRequests")
 
-urlpatterns = [
-]+router.urls
+urlpatterns = router.urls

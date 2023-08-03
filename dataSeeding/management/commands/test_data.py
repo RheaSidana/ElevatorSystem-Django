@@ -8,7 +8,8 @@ class DataTestCase(TestCase):
     @patch("dataSeeding.management.commands.data.DoorFunctions")
     @patch("dataSeeding.management.commands.data.Moving")
     @patch("dataSeeding.management.commands.data.Operational_Status")
-    def test_delete_all_data(self, mock_Operational_Status, mock_Moving, mock_DoorFunctions, mock_Movements):
+    @patch("dataSeeding.management.commands.data.ElevatorRequestStatus")
+    def test_delete_all_data(self, mock_ElevatorRequestStatus, mock_Operational_Status, mock_Moving, mock_DoorFunctions, mock_Movements):
         # arrange
         mock_Movements.objects.exists.return_value = True
         mock_Movements.objects.all.delete.return_value = "Deleted"
@@ -18,6 +19,8 @@ class DataTestCase(TestCase):
         mock_Moving.objects.all.delete.return_value = "Deleted"
         mock_Operational_Status.objects.exists.return_value = True
         mock_Operational_Status.objects.all.delete.return_value = "Deleted"
+        mock_ElevatorRequestStatus.objects.exists.return_value = True
+        mock_ElevatorRequestStatus.objects.all.delete.return_value = "Deleted"
 
         # act
         deleteAllDataFromAllModels()
@@ -26,6 +29,7 @@ class DataTestCase(TestCase):
         self.assertEqual(DoorFunctions.objects.count(), 0)
         self.assertEqual(Moving.objects.count(), 0)
         self.assertEqual(Operational_Status.objects.count(), 0)
+        self.assertEqual(ElevatorRequestStatus.objects.count(), 0)
 
     @patch("dataSeeding.management.commands.data.Movements")
     @patch("dataSeeding.management.commands.data.DoorFunctions")
@@ -164,3 +168,27 @@ class DataTestCase(TestCase):
 
         # assert
         mock_Operational_Status.objects.create.assert_not_called()
+
+    @patch("dataSeeding.management.commands.data.ElevatorRequestStatus")
+    def test_addElevatorRequestStatus(self, mock_ElevatorRequestStatus):
+        # arrange
+        mock_ElevatorRequestStatus.objects.filter.return_value.exists.return_value = False
+
+        # act
+        addElevatorRequestStatus()
+
+        # assert
+        calls = [call(name='open'), call(name='closed')]
+        mock_ElevatorRequestStatus.objects.create.assert_has_calls(
+            calls, any_order=True)
+
+    @patch("dataSeeding.management.commands.data.ElevatorRequestStatus")
+    def test_addElevatorRequestStatus_when_db_has_data(self, mock_ElevatorRequestStatus):
+        # arrange
+        mock_ElevatorRequestStatus.objects.filter.return_value.exists.return_value = True
+
+        # act
+        addElevatorRequestStatus()
+
+        # assert
+        mock_ElevatorRequestStatus.objects.create.assert_not_called()

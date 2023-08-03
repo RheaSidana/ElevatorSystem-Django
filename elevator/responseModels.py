@@ -1,7 +1,0 @@
-errorResponse = {
-    "Message" : ""
-}
-
-successResponse = {
-    "Message": ""
-}
