@@ -40,6 +40,9 @@ def addMovements():
             )
             # print("Action : "+ action)
 
+def getAll(model):
+    return model.objects.all()
+
 def addDoorFunctions():
     print("Adding DoorFunctions !")
     objects = [

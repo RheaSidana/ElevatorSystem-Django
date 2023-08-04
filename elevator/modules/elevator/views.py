@@ -1,11 +1,21 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from ...models.models import ElevatorFunctionality
-from ...serializers import ElevatorFunctionalitySerializer
-from ...serializers import ElevatorNextDestinationSerializer
-from ...serializers import FullFilElevatorNextRequestsSerializer
-from .service import create_elevators, list_nextDestination
-from .service import list_fullfilElevatorNextRequest
+from ...serializers import (
+    ElevatorFunctionalitySerializer,
+    ElevatorNextDestinationSerializer,
+    FullFilElevatorNextRequestsSerializer
+)
+from .service import (
+    create_elevators,
+    list_nextDestination,
+    list_fullfilElevatorNextRequest
+)
+
+from ..redis import create_cached, list_cached
+
+elevatorFunctionalityKey = "ElevatorFunctionality"
+
 
 class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
     queryset = ElevatorFunctionality.objects.all().order_by("id")
@@ -25,6 +35,7 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
             create_elevators(data)
             serializer = ElevatorFunctionalitySerializer(
                 self.queryset, many=True)
+            create_cached(key=elevatorFunctionalityKey, data=serializer.data)
         except Exception as ex:
             return Response({
                 "status": 500,
@@ -37,6 +48,36 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
             "Elevators": serializer.data
         }, status=status.HTTP_201_CREATED)
 
+    def list(self, request):
+        data = list_cached(elevatorFunctionalityKey)
+        print("in list")
+
+        if data != {}:
+            print(data)
+            print("found")
+            serializer = ElevatorFunctionalitySerializer(data, many=True)
+            return Response({
+                "status": 200,
+                "Elevators": serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = ElevatorFunctionalitySerializer(queryset, many=True)
+            create_cached(key=elevatorFunctionalityKey,data=serializer.data)
+        except Exception as ex:
+            return Response({
+                "status": 500,
+                "message": "Internal Server Error, while accessing the DB.",
+                "error": ex,
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({
+            "status": 200,
+            "Elevators": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
 class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
@@ -45,9 +86,9 @@ class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
         if data == {}:
             return Response({
                 "status": 400,
-                "message": "Invalid value for elevator's_requests_list. "+
+                "message": "Invalid value for elevator's_requests_list. " +
                 "Must be elevator.",
-                            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
 
@@ -77,8 +118,9 @@ class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
             "Elevator": serializer.data
         }, status=status.HTTP_200_OK)
 
+
 class FullFilElevatorNextRequestsViewSet(viewsets.ModelViewSet):
-    
+
     def list(self, request):
 
         try:
@@ -103,4 +145,3 @@ class FullFilElevatorNextRequestsViewSet(viewsets.ModelViewSet):
             "status": 200,
             "Requests": serializer.data
         }, status=status.HTTP_200_OK)
-
