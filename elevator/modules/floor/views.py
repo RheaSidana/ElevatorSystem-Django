@@ -13,7 +13,7 @@ class FloorViewSet(viewsets.ModelViewSet):
     def create(self, request):
         no_of_floors = request.data.get("total_floors")
 
-        if no_of_floors == {}:
+        if request.data == {}:
             return Response({
                 "status": 400,
                 "message": "Invalid value for no_of_floors. Must be an integer.",

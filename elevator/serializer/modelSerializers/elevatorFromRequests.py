@@ -1,4 +1,4 @@
-from ..models.models import ElevatorFromRequests
+from ...models.models import ElevatorFromRequests
 from rest_framework import serializers
 
 class ElevatorFromRequestsSerializer(serializers.ModelSerializer):

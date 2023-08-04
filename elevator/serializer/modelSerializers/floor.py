@@ -1,4 +1,4 @@
-from ..models.models import Floor
+from ...models.models import Floor
 from rest_framework import serializers
 
 class FloorSerializer(serializers.ModelSerializer):

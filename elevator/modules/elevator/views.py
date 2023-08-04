@@ -12,10 +12,10 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
     serializer_class = ElevatorFunctionalitySerializer
 
     def create(self, request):
-        no_of_elevators = request.data.get("total_elevators")
+        # no_of_elevators = request.data.get("total_elevators")
         data = request.data
 
-        if no_of_elevators == {}:
+        if data == {}:
             return Response({
                 "status": 400,
                 "message": "Invalid value for no_of_elevators. Must be an integer.",
@@ -74,7 +74,7 @@ class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
         )
         return Response({
             "status": 200,
-            "Requests": serializer.data
+            "Elevator": serializer.data
         }, status=status.HTTP_200_OK)
 
 class FullFilElevatorNextRequestsViewSet(viewsets.ModelViewSet):

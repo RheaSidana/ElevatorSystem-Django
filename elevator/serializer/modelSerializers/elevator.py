@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models.models import Elevator
+from ...models.models import Elevator
 
 class ElevatorSerializer(serializers.ModelSerializer):
     class Meta:

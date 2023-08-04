@@ -1,15 +1,18 @@
-from .functionality import segregateAccordingToDirection
 from ..functionality import get_Elevator
 from ..functionality import get_ElevatorRequestStatus_Open
-from ..functionality import get_AllElevatorFunctions
+from ..functionality import get_AllElevatorFunctions, get_Elevator_Count
 from .functionality import create_ElevatorFunctionality, is_elevatorExists
 from .functionality import create_Elevator, create_ElevatorName
 from .functionality import findListOfReq, fulfillNextRequest
-
+from .functionality import segregateAccordingToDirection
+from ...models.models import Elevator
 
 def create_elevators(data):
     no = data["total_elevators"]
     peopleCapacity = data["capacity"]
+
+    if get_Elevator_Count() > 0:
+        Elevator.objects.all().delete()
 
     for i in range(1, no+1):
         val = create_ElevatorName(no=i)

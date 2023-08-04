@@ -3,10 +3,10 @@ from ..functionality import get_Floor, get_Movements, get_Elevator_Count
 from ..functionality import get_Moving, get_Operational_Status
 from ..functionality import get_DoorFunctions, get_ElevatorFunctionality
 from ...models.models import Elevator
-from ...functionality import findAllOpenForRequest, findAllOpenFromRequest
-from ..functionality import get_ElevatorRequestStatus_Closed
-from ..functionality import get_ElevatorRequestStatus_Open
-from ...models.models import ElevatorFromRequests, ElevatorForRequests
+from ..functionality import get_ElevatorForRequests
+from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
+from ..elevatorFromRequest.functionality import closeFromRequest
+from ..elevatorForRequests.functionality import closeForRequest
 
 requestCapacity = 8
 
@@ -41,7 +41,7 @@ def create_ElevatorFunctionality(elevator):
 def findListOfReq(status, elevator):
     list_req = []
 
-    list_forReqs = findAllOpenForRequest(
+    list_forReqs = get_ElevatorForRequests(
         status=status,
         elevator=elevator
     )
@@ -50,7 +50,7 @@ def findListOfReq(status, elevator):
         for fr in list_forReqs:
             list_req.append(fr.floor_id.name)
 
-    list_fromReqs = findAllOpenFromRequest(
+    list_fromReqs = get_AllOpenFromRequest(
         status=status,
         elevator=elevator,
     )
@@ -175,7 +175,7 @@ def fulfill_whenNoNextDestination(elevatorFunctionality, steps):
         steps=steps
     )
 
-    doorClose = get_DoorFunctions(name="Close")
+    doorClose = get_DoorFunctions(action="Close")
     elevatorFunctionality, steps = cal_FulFill_DoorFunctions(
         elevatorFunctionality=elevatorFunctionality,
         door=doorClose,
@@ -215,14 +215,14 @@ def fulfill_whenOperStatusIsWorking(elevatorFunctionality, steps, nextDir, nextD
     )
     fulFilled = elevatorFunctionality.floor_no.name
 
-    doorOpen = get_DoorFunctions(name="Open")
+    doorOpen = get_DoorFunctions(action="Open")
     elevatorFunctionality, steps = cal_FulFill_DoorFunctions(
         elevatorFunctionality=elevatorFunctionality,
         door=doorOpen,
         steps=steps
     )
 
-    doorClose = get_DoorFunctions(name="Close")
+    doorClose = get_DoorFunctions(action="Close")
     elevatorFunctionality, steps = cal_FulFill_DoorFunctions(
         elevatorFunctionality=elevatorFunctionality,
         door=doorClose,
@@ -265,26 +265,3 @@ def fulfillNextRequest(elevatorFunctionality, nextDest, nextDir):
         "steps": steps,
     }
 
-
-def closeFromRequest(elevator, to_floor):
-    openReq = get_ElevatorRequestStatus_Open()
-    closeReq = get_ElevatorRequestStatus_Closed()
-    ElevatorFromRequests.objects.filter(
-        elevator=elevator,
-        to_floor=to_floor,
-        status=openReq
-    ).update(
-        status=closeReq
-    )
-
-
-def closeForRequest(elevator, floor):
-    openReq = get_ElevatorRequestStatus_Open()
-    closeReq = get_ElevatorRequestStatus_Closed()
-    ElevatorForRequests.objects.filter(
-        elevator=elevator,
-        floor_id=floor,
-        status=openReq
-    ).update(
-        status=closeReq
-    )

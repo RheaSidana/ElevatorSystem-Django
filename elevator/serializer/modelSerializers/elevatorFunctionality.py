@@ -1,4 +1,4 @@
-from ..models.models import ElevatorFunctionality
+from ...models.models import ElevatorFunctionality
 from rest_framework import serializers
 
 class ElevatorFunctionalitySerializer(serializers.ModelSerializer):

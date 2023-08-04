@@ -1,9 +1,9 @@
-from ...models.models import ElevatorRequestStatus, Elevator, ElevatorForRequests
+from ...models.models import ElevatorForRequests
+from ..elevatorFunctionality.functionality import is_allAtTheSameFloor
+from .functionality import assignForRequestWhenAllAtSameFloor
+from .functionality import assignForRequestIfElevatorAlreadyHasRequests
+from .functionality import assignForRequestToTheNearestElevatorPossible
 from ..functionality import get_AllElevatorFunctions
-from ...functionality import is_allAtTheSameFloor
-from ...functionality import assignForRequestWhenAllAtSameFloor
-from ...functionality import assignForRequestIfElevatorAlreadyHasRequests
-from ...functionality import assignForRequestToTheNearestElevatorPossible
 from ..functionality import get_ElevatorRequestStatus_Open, cal_Date, cal_ReqList
 from ..functionality import get_Elevator
 

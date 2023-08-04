@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models.models import ElevatorFunctionality
+from ...models.models import ElevatorFunctionality
 
 class ElevatorFunctionalityMovingSerializer(serializers.ModelSerializer):
     elevator_name = serializers.SerializerMethodField()

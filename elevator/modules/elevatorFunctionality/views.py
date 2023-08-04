@@ -50,7 +50,7 @@ class ElevatorFunctionalityOperationalViewSet(viewsets.ModelViewSet):
     def create(self, request):
         data = request.data
 
-        if data is {}:
+        if data == {}:
             return Response({
                 "status": 400,
                 "message": "Invalid value for elevator's_requests_list. " +
