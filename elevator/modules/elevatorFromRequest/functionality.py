@@ -5,14 +5,23 @@ from ..functionality import get_Elevator, get_ElevatorFunctionality, get_Floor
 def closeFromRequest(elevator, to_floor):
     openReq = get_ElevatorRequestStatus_Open()
     closeReq = get_ElevatorRequestStatus_Closed()
-    ElevatorFromRequests.objects.filter(
+    reqs = ElevatorFromRequests.objects.filter(
         elevator=elevator,
         to_floor=to_floor,
         status=openReq
-    ).update(
+    )
+    # .update(
+    #     status=closeReq
+    # )
+
+    peopleCount = 0
+    for r in reqs:
+        peopleCount += r.count_of_people
+
+    reqs.update(
         status=closeReq
     )
-    return
+    return peopleCount
 
 def get_AllOpenFromRequest(status, elevator):
     return ElevatorFromRequests.objects.filter(
@@ -61,7 +70,7 @@ def fromRequest(from_floor, elevator, to_floor, status, count_of_people):
 
 def assignFromRequest(status, data):
     list_req = []
-    elevator = get_Elevator(name=data["elevator"])
+    elevator = get_Elevator(elevator=data["elevator"])
     elevFunc = get_ElevatorFunctionality(elevator=elevator)
 
     if elevFunc.floor_no.name != data["from_floor"]:

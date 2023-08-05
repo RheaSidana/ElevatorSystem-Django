@@ -19,7 +19,6 @@ def create_elevFuncOperational(data):
     elevFunc = get_ElevatorFunctionality(elevator=data["elevator"])
 
     if (oprStatus.value != "Working"):
-        print(oprStatus.value)
         floor = assignNextNearestFloorInTheSameDirection(
             elevatorFunctionality=elevFunc)
 

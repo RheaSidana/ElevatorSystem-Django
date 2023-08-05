@@ -9,8 +9,8 @@ def create_cached(key,data):
     cached_data =  get_cached(key=key)
 
     if cached_data:
-        print("Cached Data: ")
-        print(cached_data)
+        # print("Cached Data: ")
+        # print(cached_data)
 
         cache.delete(key=key)
 
@@ -19,11 +19,11 @@ def create_cached(key,data):
 def list_cached(key):
     cached_data =  get_cached(key=key)
 
-    print(cached_data == {})
+    # print(cached_data == {})
 
     if cached_data:
-        print("Cached Data: ")
-        print(cached_data)
+        # print("Cached Data: ")
+        # print(cached_data)
         return cached_data
     
     return {}

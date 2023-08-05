@@ -3,19 +3,32 @@ from ..functionality import get_ElevatorRequestStatus_Closed
 from ...models.models import ElevatorForRequests
 from ..functionality import get_Floor
 from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
-from ..functionality import get_Elevator_Count, get_ElevatorForRequests
+from ..functionality import (
+    get_Elevator_Count, get_ElevatorForRequests,
+    get_ElevatorForRequests_floor
+)
 
 
 def closeForRequest(elevator, floor):
     openReq = get_ElevatorRequestStatus_Open()
     closeReq = get_ElevatorRequestStatus_Closed()
-    ElevatorForRequests.objects.filter(
+    reqs = ElevatorForRequests.objects.filter(
         elevator=elevator,
         floor_id=floor,
         status=openReq
-    ).update(
+    )
+    # .update(
+    #     status=closeReq
+    # )
+
+    peopleCount = 0
+    for r in reqs:
+        peopleCount += r.count_of_people
+
+    reqs.update(
         status=closeReq
     )
+    return peopleCount
 
 
 def create_forRequest(reqID, floor_id, status, elevator, count_of_people):
@@ -26,6 +39,7 @@ def create_forRequest(reqID, floor_id, status, elevator, count_of_people):
         elevator=elevator,
         count_of_people=count_of_people
     )
+
 
 def is_allAtTheSameFloor(list_of_elevator):
     floor = list_of_elevator[0].floor_no
@@ -54,13 +68,14 @@ def cal_forRequest_count():
 def forRequest(elevator, floor_no, people_count, status, bufferCount):
     if (elevator.curr_req_count >= elevator.elevator.requestsCapacity):
         bufferCount = 0
-        return people_count, bufferCount
+        return people_count, bufferCount, None
     else:
         if (bufferCount == elevator.elevator.capacity):
             bufferCount = 0
-            return people_count, bufferCount
+            return people_count, bufferCount, None
 
         elev = elevator.elevator
+
         forReq = cal_forRequest_create(
             floor_id=floor_no,
             elevator=elev,
@@ -82,26 +97,50 @@ def forRequest(elevator, floor_no, people_count, status, bufferCount):
         elevator.save()
         forReq.save()
 
-    return people_count, bufferCount
+    return people_count, bufferCount, forReq
 
 
-def assignForRequestWhenAllAtSameFloor(list_of_elevators, data, status):
+def assignForRequestWhenAllAtSameFloor(list_of_elevators_func, data, status):
     req_added = 0
 
-    for elev in list_of_elevators:
-        bufferCount = 0
+    list_Req = []
+
+    for elevFunc in list_of_elevators_func:
+        openReq = get_ElevatorForRequests(
+            status=status,
+            elevator=elevFunc.elevator
+        )
+
+
+        bufferCount = cal_peopleCount(openReq)
+
 
         for i in range(0, (len(data["floors"]))):
             if i != req_added:
                 continue
 
-            peopleCount, bufferCount = forRequest(
-                elevator=elev,
-                floor_no=data["floors"][i],
+            floor = data["floors"][i]
+            floor_no = get_Floor(name=floor)
+            openReq_ofFloor = get_ElevatorForRequests_floor(
+                status=status,
+                elevator=elevFunc.elevator,
+                floor=floor_no
+            )
+
+            if openReq_ofFloor.count() != 0:
+                req_added += 1
+                continue
+
+            peopleCount, bufferCount, forReq = forRequest(
+                elevator=elevFunc,
+                floor_no=floor,
                 people_count=data["PeoplePerFloor"][i],
                 status=status,
                 bufferCount=bufferCount
             )
+
+            if forReq is not None:
+                list_Req.append(forReq)
 
             if peopleCount == 0:
                 req_added += 1
@@ -111,6 +150,8 @@ def assignForRequestWhenAllAtSameFloor(list_of_elevators, data, status):
 
         if req_added == (len(data["floors"])):
             break
+
+    return list_Req
 
 
 def cal_forRequest_create(floor_id, elevator, status, peopleCount):

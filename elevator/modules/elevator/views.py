@@ -50,11 +50,8 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         data = list_cached(elevatorFunctionalityKey)
-        print("in list")
 
-        if data != {}:
-            print(data)
-            print("found")
+        if data:
             serializer = ElevatorFunctionalitySerializer(data, many=True)
             return Response({
                 "status": 200,

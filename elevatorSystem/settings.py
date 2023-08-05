@@ -56,7 +56,7 @@ MIDDLEWARE = [
     #redis
     'django.middleware.cache.UpdateCacheMiddleware',  
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'elevatorSystem.urls'
@@ -100,8 +100,7 @@ CACHES = {
         "LOCATION": "redis://127.0.0.1:6379/1",  # Replace with your Redis server address and port
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-        'TIMEOUT': 3600,
+        }
     }
 }
 

@@ -49,7 +49,7 @@ class RequestFromElevatorViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_200_OK)
 
 
-class AllRequestsFromElevatorViewSet(viewsets.ModelViewSet):
+class AllRequestsFromElevatorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ElevatorFromRequests.objects.all()
     serializer_class = ElevatorFromRequestsSerializer
 

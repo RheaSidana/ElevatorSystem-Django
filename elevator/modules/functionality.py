@@ -42,6 +42,13 @@ def get_ElevatorForRequests(status, elevator):
         elevator=elevator
     )
 
+def get_ElevatorForRequests_floor(status, elevator, floor):
+    return ElevatorForRequests.objects.filter(
+        status=status,
+        elevator=elevator,
+        floor_id=floor
+    )
+
 
 def get_DoorFunctions(action):
     return DoorFunctions.objects.get(

@@ -229,11 +229,22 @@ def fulfill_whenOperStatusIsWorking(elevatorFunctionality, steps, nextDir, nextD
         steps=steps
     )
 
-    closeForRequest(elevator=elevatorFunctionality.elevator,
+    elev = elevatorFunctionality.elevator
+
+    peopleCount = closeForRequest(elevator=elev,
                     floor=elevatorFunctionality.floor_no)
+    elevatorFunctionality.curr_req_count -= 1
+    
+    if elevatorFunctionality.curr_person_count + peopleCount > elev.capacity:
+        add = elev.capacity - elevatorFunctionality.curr_person_count
+        elevatorFunctionality.curr_person_count += add
+    else:
+        elevatorFunctionality.curr_person_count += peopleCount
+    
     steps.append("Closed ForRequests")
-    closeFromRequest(elevator=elevatorFunctionality.elevator,
+    peopleCount = closeFromRequest(elevator=elevatorFunctionality.elevator,
                      to_floor=elevatorFunctionality.floor_no)
+    elevatorFunctionality.curr_person_count -= peopleCount
     steps.append("Closed FromRequests")
 
     steps.append("Ready for next direction !!")
@@ -249,7 +260,7 @@ def fulfillNextRequest(elevatorFunctionality, nextDest, nextDir):
             steps=steps
         )
 
-    elif elevatorFunctionality.operational_status.value != "Maintainence" or elevatorFunctionality.operational_status.value != "Non Operational":
+    elif elevatorFunctionality.operational_status.value == "Working":
         elevatorFunctionality, steps, fulFilled = fulfill_whenOperStatusIsWorking(
             elevatorFunctionality=elevatorFunctionality,
             steps=steps,

@@ -3,9 +3,9 @@ from ..elevatorForRequests.functionality import (
     get_AllForRequests,
 )
 from ..elevatorForRequests.service import (
-    create_forRequest, 
+    create_forRequest,
 )
-from ..functionality import(
+from ..functionality import (
     get_Floor,
     get_ElevatorRequestStatus_Closed,
     get_ElevatorRequestStatus_Open,
@@ -13,6 +13,7 @@ from ..functionality import(
     get_DoorFunctions,
     get_Moving,
 )
+
 
 def updateFromRequests(elevatorFunctionality, floor_no):
     status = get_ElevatorRequestStatus_Open()
@@ -31,11 +32,11 @@ def updateFromRequests(elevatorFunctionality, floor_no):
 def updateForRequests(elevatorFunctionality):
     status = get_ElevatorRequestStatus_Open()
     allForReq = get_AllForRequests(
-        elevator= elevatorFunctionality.elevator,
+        elevator=elevatorFunctionality.elevator,
         status=status,
     )
 
-    data={
+    data = {
         "floors": [],
         "PeoplePerFloor": []
     }
@@ -50,21 +51,24 @@ def updateForRequests(elevatorFunctionality):
 
     return
 
+
 def cal_floor_no(floor_no):
-    fl = "FL_"+floor_no
+    fl = "FL_"+str(floor_no)
     floor = get_Floor(name=fl)
     return floor
+
 
 def assignNextNearestFloorInTheSameDirection(elevatorFunctionality):
     moving_direction = elevatorFunctionality.direction
 
     curr_floor = elevatorFunctionality.floor_no.name
+
     if moving_direction.direction == "Up":
         no = int(curr_floor.split("_")[1]) + 1
     else:
         no = int(curr_floor.split("_")[1]) - 1
 
-    floor_to = cal_floor_no(floor_no=no) 
+    floor_to = cal_floor_no(floor_no=no)
     # update open from requests
     # to the next floor
     # and close the fromRequests
@@ -84,8 +88,8 @@ def assignNextNearestFloorInTheSameDirection(elevatorFunctionality):
         elevatorFunctionality=elevatorFunctionality
     )
 
-
     return floor_to
+
 
 def updateFunctionality(elevatorFunctionality, operational_status, floor):
     movement_stop = get_Movements(action="Stop")

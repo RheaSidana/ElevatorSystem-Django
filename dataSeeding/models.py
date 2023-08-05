@@ -26,12 +26,6 @@ class Operational_Status(models.Model):
 
     def __str__(self):
         return self.value
-
-# class ElevatorRequestType(models.Model):
-#     name = models.CharField(max_length=30, unique=True)
-
-#     def __str__(self):
-#         return self.name
     
 class ElevatorRequestStatus(models.Model):
     name = models.CharField(max_length=30, unique=True)

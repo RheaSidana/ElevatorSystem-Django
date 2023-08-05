@@ -32,7 +32,7 @@ class RequestForElevatorViewSet(viewsets.ModelViewSet):
             return Response({
                 "status": 500,
                 "message": "Internal Server Error, while accessing the DB.",
-                "error": ex,
+                "error": str(ex),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = ElevatorForRequestsSerializer(
@@ -43,7 +43,7 @@ class RequestForElevatorViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_201_CREATED)
 
 
-class AllRequestsForElevatorViewSet(viewsets.ModelViewSet):
+class AllRequestsForElevatorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ElevatorForRequests.objects.all()
     serializer_class = ElevatorForRequestsSerializer
 

@@ -1,17 +1,18 @@
 from ...models.models import ElevatorForRequests
 from ..functionality import (
-    cal_Date, 
+    cal_Date,
     cal_ReqList,
     get_Elevator,
     get_ElevatorRequestStatus_Open,
     get_AllElevatorFunctions
 )
-from .functionality import(
+from .functionality import (
     assignForRequestWhenAllAtSameFloor,
     assignForRequestIfElevatorAlreadyHasRequests,
     assignForRequestToTheNearestElevatorPossible,
     is_allAtTheSameFloor
 )
+
 
 def create_forRequest(data):
     status = get_ElevatorRequestStatus_Open()
@@ -35,7 +36,7 @@ def create_forRequest(data):
 def list_forRequests(data):
     elevator = data["elevator"]
     elevator = get_Elevator(elevator=elevator)
-    
+
     of_date = data["date"]
     of_date, next_date = cal_Date(convertFrom=of_date)
 

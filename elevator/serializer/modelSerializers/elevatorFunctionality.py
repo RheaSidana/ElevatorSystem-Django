@@ -19,17 +19,42 @@ class ElevatorFunctionalitySerializer(serializers.ModelSerializer):
         depth = 1
 
     def get_floor_name(self, obj):
-        return obj.floor_no.name if obj.floor_no else None
+        if obj.floor_no:
+            return obj.floor_no.name
+        if obj["floor_name"]:
+            return obj["floor_name"]
+        else:
+            return None
 
     def get_movement_action(self, obj):
-        return obj.movement.action if obj.movement else None
+        if obj.movement:
+            return obj.movement.action  
+        if obj["movement_action"]:
+            return obj["movement_action"]
+        else:
+            return None
 
     def get_moving_direction(self, obj):
-        return obj.direction.direction if obj.direction else None
+        if obj.direction:
+            return obj.direction.direction 
+        if obj["moving_direction"]:
+            return obj["moving_direction"]
+        else:
+            return None
 
     def get_operational(self, obj):
-        return obj.operational_status.value if obj.operational_status else None
+        if obj.operational_status:
+            return obj.operational_status.value
+        if obj["operational"]:
+            return obj["operational"]
+        else: 
+            return None
 
     def get_door_status(self, obj):
-        return obj.door_functionality.name if obj.door_functionality else None
+        if obj.door_functionality:
+            return obj.door_functionality.name
+        if obj["door_status"]:
+            return obj["door_status"]
+        else:
+            return None
 
