@@ -22,7 +22,6 @@
     9. Retrieve Requests for all Callings on Floors, of the particular Elevator (certain date)  <br/>
     10. Retrieve Requests from the particular Elevator to Reach on a Floors (certain date)  <br/>
     11. Retrieve the moving direction of a particular Elevator <br/>
-
     <br/>
     ** Redis is implemented on Data Seeded models, ElevatorFunctionality and Floor
 </h3>
@@ -40,18 +39,20 @@
 <br/>
 <br/>
 <br/>
-<h2>Installation</h2>
+<hr/>
+<h1>Installation</h1>
 
-<h4>1. Clone the repo</h4>
+<h3>1. Clone the repo</h3>
 
 ```
 git clone https://github.com/RheaSidana/ElevatorSystem-Django.git
 ```
-<h5>cd in the cloned project folder</h5>
+
+<h4>cd in the cloned project folder</h4>
 <br/>
 <br/>
-<h4>2. Create Virtual Environment for the project</h4>
-<h5>This project was built using Python 3.10.11</h5>
+<h3>2. Create Virtual Environment for the project</h3>
+<h4>This project was built using Python 3.10.11</h4>
 
 ```
 python -m venv venv
@@ -59,7 +60,7 @@ python -m venv venv
 
 <br/>
 <br/>
-<h5>Activate the virtual environment on VS terminal</h5>
+<h4>Activate the virtual environment on VS terminal</h4>
 
 ```
 venv\Scripts\activate
@@ -67,7 +68,7 @@ venv\Scripts\activate
 
 <br/>
 <br/>
-<h4>3. Install the packages: </h4>
+<h3>3. Install the packages: </h3>
 
 ```
 pip install -r requirements.txt
@@ -75,8 +76,8 @@ pip install -r requirements.txt
 
 <br/>
 <br/>
-<h4>4. Postgres: </h4>
-<h5>Update the DATABASES dict according to the configuration on your system</h5>
+<h3>4. Postgres: </h3>
+<h4>Update the DATABASES dict according to the configuration on your system</h4>
 
 ```
 File: elevatorSystem/settings.py
@@ -84,9 +85,9 @@ File: elevatorSystem/settings.py
 
 <br/>
 <br/>
-<h4>5. Redis: </h4>
-<h5>Update the CACHES dict according to the configuration on your system</h5>
-<h5>Cache will remain alive for 1 hr if no change occurs</h5>
+<h3>5. Redis: </h3>
+<h4>Update the CACHES dict according to the configuration on your system</h4>
+<h4>Cache will remain alive for 1 hr if no change occurs</h4>
 
 ```
 File: elevatorSystem/settings.py
@@ -94,7 +95,7 @@ File: elevatorSystem/settings.py
 
 <br/>
 <br/>
-<h4>6. Migrations: </h4>
+<h3>6. Migrations: </h3>
 
 ```
 python manage.py makemigrations
@@ -106,17 +107,17 @@ python manage.py migrate
 
 <br/>
 <br/>
-<h4>7. Create Super User:</h4>
-<h5>to view all the tables in the ADMIN url</h5>
+<h3>7. Create Super User:</h3>
+<h4>to view all the tables in the ADMIN url</h4>
 
 ```
 python manage.py createsuperuser
 ```
 
-<h5>add username, email and password</h5>
+<h4>add username, email and password</h4>
 <br/>
 <br/>
-<h4>8. Data Seeding the tables</h4>
+<h3>8. Data Seeding the tables</h3>
 
 ```
 python manage.py seed_data
@@ -124,7 +125,7 @@ python manage.py seed_data
 
 <br/>
 <br/>
-<h4>9. Run the server: </h4>
+<h3>9. Run the server: </h3>
 
 ```
 python manage.py runserver
@@ -132,8 +133,8 @@ python manage.py runserver
 
 <br/>
 <br/>
-<h4>10. Run the tests</h4>
-<h5>a. dataSeeding app tests</h5>
+<h3>10. Run the tests</h3>
+<h4>a. dataSeeding app tests</h4>
 
 ```
 python manage.py test dataSeeding
@@ -141,7 +142,7 @@ python manage.py test dataSeeding
 
 <br/>
 <br/>
-<h5>b. elevator app tests</h5>
+<h4>b. elevator app tests</h4>
 
 ```
 python manage.py test elevator
@@ -149,6 +150,10 @@ python manage.py test elevator
 
 <br/>
 <br/>
-<h4>11. APIs: </h4>
-
+<hr/>
+<h1>APIs: </h1>
+<h3> Port: 3033</h3>
+<a href="https://documenter.getpostman.com/view/28378586/2s9XxyRDnr">
+    Postman Documentation of the APIs
+</a>
 
