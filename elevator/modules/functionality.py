@@ -29,6 +29,8 @@ def get_Floor(name):
         name=name
     )
 
+def get_Floor_Count():
+    return Floor.objects.all().count()
 
 def get_Operational_Status(status):
     return Operational_Status.objects.get(
@@ -46,7 +48,7 @@ def get_ElevatorForRequests_floor(status, elevator, floor):
     return ElevatorForRequests.objects.filter(
         status=status,
         elevator=elevator,
-        floor_id=floor
+        floor_id=floor,
     )
 
 

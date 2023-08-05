@@ -13,6 +13,7 @@ from ..functionality import (
     get_DoorFunctions,
     get_Moving,
 )
+from ..elevator.service import fulfill
 
 
 def updateFromRequests(elevatorFunctionality, floor_no):
@@ -25,7 +26,11 @@ def updateFromRequests(elevatorFunctionality, floor_no):
 
     close_status = get_ElevatorRequestStatus_Closed()
 
-    allFromReq.update(to_floor=floor_no, status=close_status)
+    allFromReq.update(
+        to_floor=floor_no,
+        status=close_status
+    )
+
     return
 
 
@@ -47,28 +52,18 @@ def updateForRequests(elevatorFunctionality):
             data["floors"].append(req.floor_id.name)
             data["PeoplePerFloor"].append(req.count_of_people)
 
-        create_forRequest(data=data)
+        if data["floors"] != []:
+            create_forRequest(data=data)
 
     return
 
 
-def cal_floor_no(floor_no):
-    fl = "FL_"+str(floor_no)
-    floor = get_Floor(name=fl)
-    return floor
+def assignEveryRequestToNextDestination(elevatorFunctionality):
+    elevFulfill = fulfill(
+        elevatorFunctionality=elevatorFunctionality
+    )
 
-
-def assignNextNearestFloorInTheSameDirection(elevatorFunctionality):
-    moving_direction = elevatorFunctionality.direction
-
-    curr_floor = elevatorFunctionality.floor_no.name
-
-    if moving_direction.direction == "Up":
-        no = int(curr_floor.split("_")[1]) + 1
-    else:
-        no = int(curr_floor.split("_")[1]) - 1
-
-    floor_to = cal_floor_no(floor_no=no)
+    floor_to = get_Floor(elevFulfill["current_floor"])
     # update open from requests
     # to the next floor
     # and close the fromRequests
@@ -103,6 +98,23 @@ def updateFunctionality(elevatorFunctionality, operational_status, floor):
     elevatorFunctionality.door_functionality = door
     elevatorFunctionality.curr_req_count = 0
     elevatorFunctionality.curr_person_count = 0
+
+    elevatorFunctionality.save()
+
+    return elevatorFunctionality
+
+def updateFunctionality_WhenNotWorking(elevatorFunctionality, operational_status):
+    if elevatorFunctionality.operational_status.value == "Working":
+        return elevatorFunctionality
+    
+    movement_stop = get_Movements(action="Stop")
+    direction = get_Moving(direction="Stationary")
+    door = get_DoorFunctions(action="Close")
+
+    elevatorFunctionality.operational_status = operational_status
+    elevatorFunctionality.movement = movement_stop
+    elevatorFunctionality.direction = direction
+    elevatorFunctionality.door_functionality = door
 
     elevatorFunctionality.save()
 

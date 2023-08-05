@@ -30,6 +30,7 @@ def create_forRequest(data):
             list_forReq = assignForRequestToTheNearestElevatorPossible(
                 list_of_elevators, data, status
             )
+
     return list_forReq
 
 

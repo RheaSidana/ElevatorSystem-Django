@@ -31,7 +31,11 @@
 <h4>Functionality left for implementation: </h4>
 <h5>
     1. Implementing Redis caching on all models <br/>
-    2. Writing test for all the functions in the project.
+    2. Writing test for all the functions in the project.<br/>
+    3. When all the elevator's capacity is full or request capaity is full:
+        then the requests should be saved in an external queue, 
+        and as the current request capacity or capacity of any elevator 
+        can take the forRequests -> FCFS
 </h5>
 <br/>
 <br/>

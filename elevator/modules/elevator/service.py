@@ -7,6 +7,7 @@ from .functionality import findListOfReq, fulfillNextRequest
 from .functionality import segregateAccordingToDirection
 from ...models.models import Elevator
 
+
 def create_elevators(data):
     no = data["total_elevators"]
     peopleCapacity = data["capacity"]
@@ -35,21 +36,28 @@ def list_nextDestination(data):
     return obj
 
 
+def fulfill(elevatorFunctionality):
+    data = dict()
+
+    data["elevator"] = elevatorFunctionality.elevator.name
+
+    obj = list_nextDestination(data=data)
+
+    ob = fulfillNextRequest(
+        elevatorFunctionality=elevatorFunctionality,
+        nextDest=obj["next_floor"],
+        nextDir=obj["next_direction"],
+    )
+
+    return ob
+
+
 def list_fullfilElevatorNextRequest():
     list_obj = []
     elevFuncs = get_AllElevatorFunctions()
-    data = dict()
 
     for elevatorFunc in elevFuncs:
-        data["elevator"] = elevatorFunc.elevator.name
-
-        obj = list_nextDestination(data=data)
-
-        ob = fulfillNextRequest(
-            elevatorFunctionality=elevatorFunc,
-            nextDest=obj["next_floor"],
-            nextDir=obj["next_direction"],
-        )
+        ob = fulfill(elevatorFunctionality=elevatorFunc)
 
         list_obj.append(ob)
 

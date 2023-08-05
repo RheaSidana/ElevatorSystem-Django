@@ -4,8 +4,9 @@ from ..functionality import (
     get_DoorFunctions
 )
 from .functionality import (
-    assignNextNearestFloorInTheSameDirection,
-    updateFunctionality
+    assignEveryRequestToNextDestination,
+    updateFunctionality,
+    updateFunctionality_WhenNotWorking
 )
 
 
@@ -19,14 +20,20 @@ def create_elevFuncOperational(data):
     elevFunc = get_ElevatorFunctionality(elevator=data["elevator"])
 
     if (oprStatus.value != "Working"):
-        floor = assignNextNearestFloorInTheSameDirection(
+        floor = assignEveryRequestToNextDestination(
             elevatorFunctionality=elevFunc)
+        
 
-    updateFunctionality(
+        elevFunc=updateFunctionality(
         elevatorFunctionality=elevFunc,
         operational_status=oprStatus,
         floor=floor
     )
+    else:
+        elevFunc = updateFunctionality_WhenNotWorking(
+            elevatorFunctionality=elevFunc,
+            operational_status=oprStatus,
+        )
 
     return elevFunc
 
