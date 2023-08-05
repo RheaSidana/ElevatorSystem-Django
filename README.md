@@ -31,10 +31,7 @@
 <h4>Functionality left for implementation: </h4>
 <h5>
     1. Implementing Redis caching on all models <br/>
-    2. When Elevator is marked as "non-operational" or "maintainence",
-    then all the for requests should be assigned to other eleators and 
-    the elevator should be stopped after fulfilling the next destination. <br/>
-    3. Writing test for all the functions in the project.
+    2. Writing test for all the functions in the project.
 </h5>
 <br/>
 <br/>

@@ -4,6 +4,7 @@ from ...models.models import ElevatorFunctionality
 from ...serializers import ElevatorFunctionalityMovingSerializer, ElevatorFunctionalityOperationalSerializer, ElevatorFunctionalityDoorSerializer
 from .service import list_elevFuncMoving, create_elevFuncOperational, create_elevFuncDoor
 
+
 class ElevatorFunctionalityMovingViewSet(viewsets.ModelViewSet):
     queryset = ElevatorFunctionality.objects.all().order_by("id")
     serializer_class = ElevatorFunctionalityMovingSerializer
@@ -42,6 +43,7 @@ class ElevatorFunctionalityMovingViewSet(viewsets.ModelViewSet):
             "status": 200,
             "Requests": serializer.data
         }, status=status.HTTP_200_OK)
+
 
 class ElevatorFunctionalityOperationalViewSet(viewsets.ModelViewSet):
     queryset = ElevatorFunctionality.objects.all().order_by("id")
@@ -83,6 +85,7 @@ class ElevatorFunctionalityOperationalViewSet(viewsets.ModelViewSet):
             "Requests": serializer.data
         }, status=status.HTTP_200_OK)
 
+
 class ElevatorFunctionalityDoorViewSet(viewsets.ModelViewSet):
     queryset = ElevatorFunctionality.objects.all().order_by("id")
     serializer_class = ElevatorFunctionalityDoorSerializer
@@ -122,4 +125,3 @@ class ElevatorFunctionalityDoorViewSet(viewsets.ModelViewSet):
             "status": 201,
             "Elevator": serializer.data
         }, status=status.HTTP_201_CREATED)
-

@@ -1,20 +1,33 @@
-from ..functionality import get_ElevatorFunctionality
-from ..functionality import get_Operational_Status
-from ..functionality import get_DoorFunctions
+from ..functionality import (
+    get_ElevatorFunctionality,
+    get_Operational_Status,
+    get_DoorFunctions
+)
+from .functionality import (
+    assignNextNearestFloorInTheSameDirection,
+    updateFunctionality
+)
+
 
 def list_elevFuncMoving(data):
     return get_ElevatorFunctionality(elevator=data["elevator"])
 
-"""
-if any req found assign to other elevators
-"""
+
 def create_elevFuncOperational(data):
     oprStatus = get_Operational_Status(status=data["status"])
 
     elevFunc = get_ElevatorFunctionality(elevator=data["elevator"])
 
-    elevFunc.operational_status = oprStatus
-    elevFunc.save()
+    if (oprStatus.value != "Working"):
+        print(oprStatus.value)
+        floor = assignNextNearestFloorInTheSameDirection(
+            elevatorFunctionality=elevFunc)
+
+    updateFunctionality(
+        elevatorFunctionality=elevFunc,
+        operational_status=oprStatus,
+        floor=floor
+    )
 
     return elevFunc
 

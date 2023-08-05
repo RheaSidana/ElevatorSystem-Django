@@ -32,7 +32,8 @@ def is_fromRequests_exists():
 
 
 def count_fromRequests():
-    return ElevatorFromRequests.objects.count()
+    return int(
+        ElevatorFromRequests.objects.last().reqID.split("_")[1])
 
 
 def cal_fromRequest_count():

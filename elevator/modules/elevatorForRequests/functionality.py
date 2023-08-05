@@ -1,4 +1,5 @@
-from ..functionality import get_ElevatorRequestStatus_Open, get_ElevatorRequestStatus_Closed
+from ..functionality import get_ElevatorRequestStatus_Open
+from ..functionality import get_ElevatorRequestStatus_Closed
 from ...models.models import ElevatorForRequests
 from ..functionality import get_Floor
 from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
@@ -25,6 +26,13 @@ def create_forRequest(reqID, floor_id, status, elevator, count_of_people):
         elevator=elevator,
         count_of_people=count_of_people
     )
+
+def is_allAtTheSameFloor(list_of_elevator):
+    floor = list_of_elevator[0].floor_no
+    for elev in list_of_elevator:
+        if floor != elev.floor_no:
+            return False
+    return True
 
 
 def is_forRequests_exists():
@@ -278,3 +286,10 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators, data, status
             data["PeoplePerFloor"][i] = peopleCount
         else:
             i += 1
+
+
+def get_AllForRequests(elevator, status):
+    return ElevatorForRequests.objects.filter(
+        elevator=elevator,
+        status=status,
+    )
