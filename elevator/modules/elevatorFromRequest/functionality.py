@@ -42,7 +42,7 @@ def is_fromRequests_exists():
 
 def count_fromRequests():
     return int(
-        ElevatorFromRequests.objects.all().order_by("reqID")
+        ElevatorFromRequests.objects.all().order_by("reqTime")
         .last().reqID.split("_")[1]
     )
 

@@ -58,7 +58,7 @@ def is_forRequests_exists():
 def count_forRequests():
     return int(
         ElevatorForRequests
-        .objects.all().order_by("reqID")
+        .objects.all().order_by("reqTime")
         .last().reqID.split("_")[1]
     )
 
@@ -130,7 +130,7 @@ def assignForRequestWhenAllAtSameFloor(list_of_elevators_func, data, status):
             )
 
             if openReq_ofFloor.count() != 0:
-                list_Req.append(openReq_ofFloor)
+                list_Req += openReq_ofFloor
                 req_added += 1
                 continue
 

@@ -6,7 +6,7 @@ from .service import create_forRequest, list_forRequests
 
 
 class RequestForElevatorViewSet(viewsets.ModelViewSet):
-    queryset = ElevatorForRequests.objects.all().order_by("reqID")
+    queryset = ElevatorForRequests.objects.all().order_by("reqTime")
     serializer_class = ElevatorForRequestsSerializer
 
     """
