@@ -117,7 +117,6 @@ class ElevatorNextDestinationViewSet(viewsets.ModelViewSet):
 
 
 class FullFilElevatorNextRequestsViewSet(viewsets.ModelViewSet):
-
     def list(self, request):
 
         try:

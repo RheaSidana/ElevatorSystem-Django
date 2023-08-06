@@ -4,7 +4,7 @@ from ..functionality import get_AllElevatorFunctions, get_Elevator_Count
 from .functionality import create_ElevatorFunctionality, is_elevatorExists
 from .functionality import create_Elevator, create_ElevatorName
 from .functionality import findListOfReq, fulfillNextRequest
-from .functionality import segregateAccordingToDirection
+from .functionality import segregateAccordingToDirection, assignForRequestIfElevatorIsNull
 from ...models.models import Elevator
 
 
@@ -60,5 +60,6 @@ def list_fullfilElevatorNextRequest():
         ob = fulfill(elevatorFunctionality=elevatorFunc)
 
         list_obj.append(ob)
+    assignForRequestIfElevatorIsNull()
 
     return list_obj

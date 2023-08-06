@@ -5,7 +5,8 @@ from ..functionality import get_Floor
 from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
 from ..functionality import (
     get_Floor_Count, get_ElevatorForRequests,
-    get_ElevatorForRequests_floor
+    get_ElevatorForRequests_floor,
+    get_ElevatorForRequests_floor_elevatorIsNull
 )
 from ..functionality import get_Operational_Status
 
@@ -56,7 +57,9 @@ def is_forRequests_exists():
 
 def count_forRequests():
     return int(
-        ElevatorForRequests.objects.last().reqID.split("_")[1]
+        ElevatorForRequests
+        .objects.all().order_by("reqID")
+        .last().reqID.split("_")[1]
     )
 
 
@@ -171,7 +174,6 @@ def foundInFromRequest(floor_id, status, elevatorFunc, peopleCount, fromReq):
     elev = elevatorFunc.elevator
     if (elevatorFunc.curr_req_count == elev.requestsCapacity):
         return peopleCount, None
-    # curr_person_count = models.IntegerField()
     else:
         forReq = cal_forRequest_create(
             floor_id=floor_id,
@@ -194,7 +196,6 @@ def foundInFromRequest(floor_id, status, elevatorFunc, peopleCount, fromReq):
 
 
 def assignForRequestIfElevatorAlreadyHasRequests(list_of_elevators, data, status):
-
     list_req = []
     for elevatorFunc in list_of_elevators:
         elevator = elevatorFunc.elevator
@@ -255,6 +256,16 @@ def findMinDiff(elevator, floor_no, bufferCount, min, openReq=0):
 
 
 def forRequestToElevator(elevatorFunc, floor_no, people_count, status, bufferCount):
+    if elevatorFunc is None:
+        print("in None")
+        elev = None
+        forReq = cal_forRequest_create(
+            floor_id=floor_no,
+            elevator=elev,
+            status=status,
+            peopleCount=people_count
+        )
+        return 0, forReq
     if (elevatorFunc.curr_req_count >= elevatorFunc.elevator.requestsCapacity):
         bufferCount = 0
         return people_count, None
@@ -307,18 +318,30 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators_func, data, s
     isReqFullFill = True
     req_added = 0
     while i <= (length-1):
+        if req_added == length:
+            break
         if i != req_added:
             continue
         minDiff = get_Floor_Count()
         minElev = None
         found = False
+
+        # if reqest exist with null elevator 
+        # it should not add 1 more req
+        floor = get_Floor(name=data["floors"][i])
+        req = get_ElevatorForRequests_floor_elevatorIsNull(
+            floor=floor,
+        )
+        if req.count() != 0:
+            req_added += 1
+            continue
+
         for elevatorFunc in list_of_elevators_func:
             if req_added == length:
                 break
 
             elev = elevatorFunc.elevator
             if isReqFullFill == True:
-
                 # if request already exists = continue
                 openReq_Floor = ForRequestAlreadyExists(
                     floor=data["floors"][i],
@@ -350,6 +373,9 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators_func, data, s
             )
 
             bufferCount = cal_peopleCount(openReq)
+            print("bufferCount = ", str(bufferCount))
+            if bufferCount == elev.capacity:
+                continue
 
             if minElev is None:
                 minElev = elevatorFunc
@@ -368,6 +394,13 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators_func, data, s
                 buffCount = bufferCount
 
         if not found:
+            print("not found")
+            print("buffCount: ", str(buffCount))
+            print("minElev : ", str(minElev))
+            # if buffCount == minElev.elevator.capacity or minElev.curr_req_count == minElev.elevator.requestsCapacity:
+                # print("in buffCount")
+                # minElev = None
+
             peopleCount, req = forRequestToElevator(
                 elevatorFunc=minElev,
                 floor_no=data["floors"][i],

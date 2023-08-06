@@ -8,7 +8,7 @@ class ElevatorForRequests(models.Model):
     reqTime = models.DateTimeField(auto_now_add=True)
     floor_id = models.ForeignKey(Floor, on_delete=models.CASCADE, related_name="requestOn")
     status = models.ForeignKey(ElevatorRequestStatus, on_delete=models.CASCADE, related_name="request_status")
-    elevator = models.ForeignKey(Elevator, on_delete=models.CASCADE, related_name="request_for")
+    elevator = models.ForeignKey(Elevator, on_delete=models.CASCADE, related_name="request_for", null=True)
     count_of_people = models.IntegerField(default=0)
 
     def __str__(self):

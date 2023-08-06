@@ -20,15 +20,33 @@ def create_elevFuncOperational(data):
     elevFunc = get_ElevatorFunctionality(elevator=data["elevator"])
 
     if (oprStatus.value != "Working"):
+        if (
+            oprStatus.value == "Maintainence" and
+            elevFunc.operational_status == oprStatus
+        ) or (
+            oprStatus.value == "Non Operational" and
+            elevFunc.operational_status == oprStatus
+        ):
+            return elevFunc
+
+        elif (
+            elevFunc.operational_status.value != "Working"
+        ):
+            elevFunc = updateFunctionality(
+                elevatorFunctionality=elevFunc,
+                operational_status=oprStatus,
+                floor=elevFunc.floor_no
+            )
+            return elevFunc
+
         floor = assignEveryRequestToNextDestination(
             elevatorFunctionality=elevFunc)
-        
 
-        elevFunc=updateFunctionality(
-        elevatorFunctionality=elevFunc,
-        operational_status=oprStatus,
-        floor=floor
-    )
+        elevFunc = updateFunctionality(
+            elevatorFunctionality=elevFunc,
+            operational_status=oprStatus,
+            floor=floor
+        )
     else:
         elevFunc = updateFunctionality_WhenNotWorking(
             elevatorFunctionality=elevFunc,

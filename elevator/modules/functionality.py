@@ -51,6 +51,16 @@ def get_ElevatorForRequests_floor(status, elevator, floor):
         floor_id=floor,
     )
 
+def get_ElevatorForRequests_floor_elevatorIsNull(floor):
+    return ElevatorForRequests.objects.filter(
+            floor_id = floor,
+            elevator__isnull = True
+        )
+
+def get_ElevatorForRequests_elevatorIsNull():
+    return ElevatorForRequests.objects.filter(
+            elevator__isnull = True
+        )
 
 def get_DoorFunctions(action):
     return DoorFunctions.objects.get(
@@ -106,4 +116,3 @@ def cal_ReqList(model, elevator, of_date, next_date):
         Q(reqTime__gt=of_date) &
         Q(reqTime__lt=next_date)
     )
-

@@ -1,12 +1,23 @@
-from ...models.models import ElevatorFunctionality
-from ..functionality import get_Floor, get_Movements, get_Elevator_Count
-from ..functionality import get_Moving, get_Operational_Status
-from ..functionality import get_DoorFunctions, get_ElevatorFunctionality
-from ...models.models import Elevator
-from ..functionality import get_ElevatorForRequests
-from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
-from ..elevatorFromRequest.functionality import closeFromRequest
 from ..elevatorForRequests.functionality import closeForRequest
+from ..elevatorFromRequest.functionality import (
+    closeFromRequest,
+    get_AllOpenFromRequest
+)
+from ..elevatorForRequests.service import create_forRequest
+from ...models.models import ElevatorFunctionality
+from ..functionality import (
+    get_Floor,
+    get_Movements,
+    get_Elevator_Count,
+    get_Moving,
+    get_Operational_Status,
+    get_DoorFunctions,
+    get_ElevatorFunctionality,
+    get_ElevatorForRequests,
+    get_ElevatorForRequests_elevatorIsNull,
+)
+from ...models.models import Elevator
+get_ElevatorForRequests
 
 requestCapacity = 8
 
@@ -232,18 +243,18 @@ def fulfill_whenOperStatusIsWorking(elevatorFunctionality, steps, nextDir, nextD
     elev = elevatorFunctionality.elevator
 
     peopleCount = closeForRequest(elevator=elev,
-                    floor=elevatorFunctionality.floor_no)
+                                  floor=elevatorFunctionality.floor_no)
     elevatorFunctionality.curr_req_count -= 1
-    
+
     if elevatorFunctionality.curr_person_count + peopleCount > elev.capacity:
         add = elev.capacity - elevatorFunctionality.curr_person_count
         elevatorFunctionality.curr_person_count += add
     else:
         elevatorFunctionality.curr_person_count += peopleCount
-    
+
     steps.append("Closed ForRequests")
     peopleCount = closeFromRequest(elevator=elevatorFunctionality.elevator,
-                     to_floor=elevatorFunctionality.floor_no)
+                                   to_floor=elevatorFunctionality.floor_no)
     elevatorFunctionality.curr_person_count -= peopleCount
     steps.append("Closed FromRequests")
 
@@ -276,3 +287,19 @@ def fulfillNextRequest(elevatorFunctionality, nextDest, nextDir):
         "steps": steps,
     }
 
+
+def assignForRequestIfElevatorIsNull():
+    elevatorNullReqs = get_ElevatorForRequests_elevatorIsNull()
+
+    if elevatorNullReqs:
+        data = {
+            "floors": [],
+            "PeoplePerFloor": []
+        }
+        for req in elevatorNullReqs:
+            data["floors"].append(req.floor_id.name)
+            data["PeoplePerFloor"].append(
+                req.count_of_people
+            )
+            req.delete()
+            create_forRequest(data=data)

@@ -6,7 +6,7 @@ from .service import create_forRequest, list_forRequests
 
 
 class RequestForElevatorViewSet(viewsets.ModelViewSet):
-    queryset = ElevatorForRequests.objects.all()
+    queryset = ElevatorForRequests.objects.all().order_by("reqID")
     serializer_class = ElevatorForRequestsSerializer
 
     """
