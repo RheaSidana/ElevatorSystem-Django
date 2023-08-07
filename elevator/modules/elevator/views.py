@@ -14,7 +14,7 @@ from .service import (
 from ...serializer.cacheModelSerialisers.elevatorFunctionality import (
     ElevatorFunctionalitySerializer as ElevFuncSerializerOfCache
     )
-from ..redis import create_cached, list_cached
+from ..redis import create_cached_infiniteTimeout, list_cached
 
 elevatorFunctionalityKey = "ElevatorFunctionality"
 
@@ -37,7 +37,7 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
             create_elevators(data)
             serializer = ElevatorFunctionalitySerializer(
                 self.queryset, many=True)
-            create_cached(key=elevatorFunctionalityKey, data=serializer.data)
+            create_cached_infiniteTimeout(key=elevatorFunctionalityKey, data=serializer.data)
         except Exception as ex:
             return Response({
                 "status": 500,
@@ -63,7 +63,7 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
         try:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = ElevatorFunctionalitySerializer(queryset, many=True)
-            create_cached(key=elevatorFunctionalityKey,data=serializer.data)
+            create_cached_infiniteTimeout(key=elevatorFunctionalityKey,data=serializer.data)
         except Exception as ex:
             return Response({
                 "status": 500,

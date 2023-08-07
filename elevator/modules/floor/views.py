@@ -7,7 +7,7 @@ from ...serializers import FloorSerializer
 from .service import create_floor
 from ..redis import *
 
-floarKey = "Floor"
+floorKey = "Floor"
 
 class FloorViewSet(viewsets.ModelViewSet):
     queryset = Floor.objects.all()
@@ -32,9 +32,37 @@ class FloorViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         serializer = FloorSerializer(self.queryset, many=True)
-        create_cached(key=Floor, data=serializer.data)
+        create_cached_infiniteTimeout(key=Floor, data=serializer.data)
         return Response({
             "status": 201,
             "Floors": serializer.data
         }, status=status.HTTP_201_CREATED)
+    
+    def list(self, request):
+        data = list_cached(floorKey)
+
+        if data:
+            serializer = FloorSerializer(
+                data, many = True
+            )
+            return Response({
+                "status": 200,
+                "Elevators": serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = FloorSerializer(queryset, many=True)
+            create_cached_infiniteTimeout(key=floorKey,data=serializer.data)
+        except Exception as ex:
+            return Response({
+                "status": 500,
+                "message": "Internal Server Error, while accessing the DB.",
+                "error": ex,
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({
+            "status": 200,
+            "Elevators": serializer.data
+        }, status=status.HTTP_200_OK)
 
