@@ -192,6 +192,7 @@ def fulfill_whenNoNextDestination(elevatorFunctionality, steps):
         door=doorClose,
         steps=steps
     )
+    elevatorFunctionality.save()
     return elevatorFunctionality, steps
 
 
@@ -259,6 +260,7 @@ def fulfill_whenOperStatusIsWorking(elevatorFunctionality, steps, nextDir, nextD
     steps.append("Closed FromRequests")
 
     steps.append("Ready for next direction !!")
+    elevatorFunctionality.save()
     return elevatorFunctionality, steps, fulFilled
 
 
@@ -278,7 +280,7 @@ def fulfillNextRequest(elevatorFunctionality, nextDest, nextDir):
             nextDest=nextDest,
             nextDir=nextDir
         )
-    elevatorFunctionality.save()
+    # elevatorFunctionality.save()
 
     return {
         "elevator_name": elevatorFunctionality.elevator.name,

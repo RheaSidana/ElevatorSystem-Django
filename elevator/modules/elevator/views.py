@@ -11,7 +11,9 @@ from .service import (
     list_nextDestination,
     list_fullfilElevatorNextRequest
 )
-
+from ...serializer.cacheModelSerialisers.elevatorFunctionality import (
+    ElevatorFunctionalitySerializer as ElevFuncSerializerOfCache
+    )
 from ..redis import create_cached, list_cached
 
 elevatorFunctionalityKey = "ElevatorFunctionality"
@@ -52,7 +54,7 @@ class ElevatorFunctionalityViewSet(viewsets.ModelViewSet):
         data = list_cached(elevatorFunctionalityKey)
 
         if data:
-            serializer = ElevatorFunctionalitySerializer(data, many=True)
+            serializer = ElevFuncSerializerOfCache(data, many=True)
             return Response({
                 "status": 200,
                 "Elevators": serializer.data
