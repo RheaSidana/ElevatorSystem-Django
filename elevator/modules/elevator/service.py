@@ -1,12 +1,42 @@
-from ..functionality import get_Elevator
-from ..functionality import get_ElevatorRequestStatus_Open
-from ..functionality import get_AllElevatorFunctions, get_Elevator_Count
-from .functionality import create_ElevatorFunctionality, is_elevatorExists
-from .functionality import create_Elevator, create_ElevatorName
-from .functionality import findListOfReq, fulfillNextRequest
-from .functionality import segregateAccordingToDirection, assignForRequestIfElevatorIsNull
+from ..functionality import get_Elevator_Count
 from ...models.models import Elevator
+from ...models.models import ElevatorFunctionality
+from ..functionality import (
+    get_Floor,
+    get_Movements,
+    get_Moving,
+    get_Operational_Status,
+    get_DoorFunctions
+)
 
+requestCapacity = 8
+
+
+def is_elevatorExists(name):
+    return Elevator.objects.filter(name=name).exists()
+
+
+def create_ElevatorName(no):
+    return "EL_" + str(no)
+
+
+def create_Elevator(name, capacity):
+    return Elevator.objects.create(
+        name=name, capacity=capacity, requestsCapacity=requestCapacity,
+    )
+
+
+def create_ElevatorFunctionality(elevator):
+    return ElevatorFunctionality.objects.create(
+        movement=get_Movements(action="Stop"),
+        floor_no=get_Floor(name="FL_1"),
+        direction=get_Moving(direction="Stationary"),
+        operational_status=get_Operational_Status(status="Working"),
+        door_functionality=get_DoorFunctions(action="Close"),
+        elevator=elevator,
+        curr_req_count=0,
+        curr_person_count=0,
+    )
 
 def create_elevators(data):
     no = data["total_elevators"]
@@ -20,46 +50,3 @@ def create_elevators(data):
         if not is_elevatorExists(name=val):
             elevator = create_Elevator(name=val, capacity=peopleCapacity)
             ele_func = create_ElevatorFunctionality(elevator=elevator)
-
-
-def list_nextDestination(data):
-    elevator = data["elevator"]
-    elevator = get_Elevator(elevator=elevator)
-    status = get_ElevatorRequestStatus_Open()
-
-    list_req = findListOfReq(status=status, elevator=elevator)
-
-    try:
-        obj = segregateAccordingToDirection(elevator, sorted(list_req))
-    except Exception as ex:
-        raise Exception(ex)
-    return obj
-
-
-def fulfill(elevatorFunctionality):
-    data = dict()
-
-    data["elevator"] = elevatorFunctionality.elevator.name
-
-    obj = list_nextDestination(data=data)
-
-    ob = fulfillNextRequest(
-        elevatorFunctionality=elevatorFunctionality,
-        nextDest=obj["next_floor"],
-        nextDir=obj["next_direction"],
-    )
-
-    return ob
-
-
-def list_fullfilElevatorNextRequest():
-    list_obj = []
-    elevFuncs = get_AllElevatorFunctions()
-
-    for elevatorFunc in elevFuncs:
-        ob = fulfill(elevatorFunctionality=elevatorFunc)
-
-        list_obj.append(ob)
-    assignForRequestIfElevatorIsNull()
-
-    return list_obj

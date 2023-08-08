@@ -8,16 +8,16 @@ from ..elevatorForRequests.service import (
 from ..functionality import (
     get_Floor,
     get_ElevatorRequestStatus_Closed,
-    get_ElevatorRequestStatus_Open,
+    getElevatorRequestStatusOpen,
     get_Movements,
     get_DoorFunctions,
     get_Moving,
 )
-from ..elevator.service import fulfill
+from ..fulFillElevatorsNextRequest.service import fulfill
 
 
 def updateFromRequests(elevatorFunctionality, floor_no):
-    status = get_ElevatorRequestStatus_Open()
+    status = getElevatorRequestStatusOpen()
 
     allFromReq = get_AllOpenFromRequest(
         status=status,
@@ -35,7 +35,7 @@ def updateFromRequests(elevatorFunctionality, floor_no):
 
 
 def updateForRequests(elevatorFunctionality):
-    status = get_ElevatorRequestStatus_Open()
+    status = getElevatorRequestStatusOpen()
     allForReq = get_AllForRequests(
         elevator=elevatorFunctionality.elevator,
         status=status,

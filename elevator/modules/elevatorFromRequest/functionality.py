@@ -1,9 +1,9 @@
-from ..functionality import get_ElevatorRequestStatus_Open, get_ElevatorRequestStatus_Closed
+from ..functionality import getElevatorRequestStatusOpen, get_ElevatorRequestStatus_Closed
 from ...models.models import ElevatorFromRequests
 from ..functionality import get_Elevator, get_ElevatorFunctionality, get_Floor
 
 def closeFromRequest(elevator, to_floor):
-    openReq = get_ElevatorRequestStatus_Open()
+    openReq = getElevatorRequestStatusOpen()
     closeReq = get_ElevatorRequestStatus_Closed()
     reqs = ElevatorFromRequests.objects.filter(
         elevator=elevator,

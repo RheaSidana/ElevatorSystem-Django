@@ -1,5 +1,7 @@
-from .elevator.views import ElevatorFunctionalityViewSet, ElevatorNextDestinationViewSet, FullFilElevatorNextRequestsViewSet
+from .elevator.views import ElevatorFunctionalityViewSet
 from .floor.views import FloorViewSet
 from .elevatorForRequests.views import RequestForElevatorViewSet, AllRequestsForElevatorViewSet
 from .elevatorFromRequest.views import RequestFromElevatorViewSet, AllRequestsFromElevatorViewSet
 from .elevatorFunctionality.views import ElevatorFunctionalityDoorViewSet, ElevatorFunctionalityMovingViewSet, ElevatorFunctionalityOperationalViewSet
+from .elevatorNextDestination.views import ElevatorNextDestinationViewSet
+from .fulFillElevatorsNextRequest.views import FulFillElevatorNextRequestsViewSet

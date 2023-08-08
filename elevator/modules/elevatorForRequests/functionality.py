@@ -1,4 +1,4 @@
-from ..functionality import get_ElevatorRequestStatus_Open
+from ..functionality import getElevatorRequestStatusOpen
 from ..functionality import get_ElevatorRequestStatus_Closed
 from ...models.models import ElevatorForRequests
 from ..functionality import get_Floor
@@ -12,7 +12,7 @@ from ..functionality import get_Operational_Status
 
 
 def closeForRequest(elevator, floor):
-    openReq = get_ElevatorRequestStatus_Open()
+    openReq = getElevatorRequestStatusOpen()
     closeReq = get_ElevatorRequestStatus_Closed()
     reqs = ElevatorForRequests.objects.filter(
         elevator=elevator,
@@ -257,7 +257,6 @@ def findMinDiff(elevator, floor_no, bufferCount, min, openReq=0):
 
 def forRequestToElevator(elevatorFunc, floor_no, people_count, status, bufferCount):
     if elevatorFunc is None:
-        print("in None")
         elev = None
         forReq = cal_forRequest_create(
             floor_id=floor_no,
@@ -373,7 +372,6 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators_func, data, s
             )
 
             bufferCount = cal_peopleCount(openReq)
-            print("bufferCount = ", str(bufferCount))
             if bufferCount == elev.capacity:
                 continue
 
@@ -394,12 +392,6 @@ def assignForRequestToTheNearestElevatorPossible(list_of_elevators_func, data, s
                 buffCount = bufferCount
 
         if not found:
-            print("not found")
-            print("buffCount: ", str(buffCount))
-            print("minElev : ", str(minElev))
-            # if buffCount == minElev.elevator.capacity or minElev.curr_req_count == minElev.elevator.requestsCapacity:
-                # print("in buffCount")
-                # minElev = None
 
             peopleCount, req = forRequestToElevator(
                 elevatorFunc=minElev,

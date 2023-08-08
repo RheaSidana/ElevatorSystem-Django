@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-class FullFilElevatorNextRequestsSerializer(serializers.Serializer):
+class FulFillElevatorsNextRequestsSerializer(serializers.Serializer):
     elevator_name = serializers.CharField()
     current_floor = serializers.CharField()
     fulfilled_floor = serializers.CharField()

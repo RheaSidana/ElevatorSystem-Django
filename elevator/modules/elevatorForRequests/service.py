@@ -3,7 +3,7 @@ from ..functionality import (
     cal_Date,
     cal_ReqList,
     get_Elevator,
-    get_ElevatorRequestStatus_Open,
+    getElevatorRequestStatusOpen,
     get_AllElevatorFunctions
 )
 from .functionality import (
@@ -15,7 +15,7 @@ from .functionality import (
 
 
 def create_forRequest(data):
-    status = get_ElevatorRequestStatus_Open()
+    status = getElevatorRequestStatusOpen()
     list_of_elevators = get_AllElevatorFunctions()
     if is_allAtTheSameFloor(list_of_elevators):
         # list_forReq ElevatorForRequestsSerializer

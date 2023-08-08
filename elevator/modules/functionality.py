@@ -7,7 +7,8 @@ from ..models.models import (
     Moving,
     Floor,
     Movements,
-    ElevatorForRequests
+    ElevatorForRequests,
+    ElevatorFromRequests
 )
 from datetime import datetime
 from django.utils import timezone
@@ -29,8 +30,10 @@ def get_Floor(name):
         name=name
     )
 
+
 def get_Floor_Count():
     return Floor.objects.all().count()
+
 
 def get_Operational_Status(status):
     return Operational_Status.objects.get(
@@ -42,7 +45,13 @@ def get_ElevatorForRequests(status, elevator):
     return ElevatorForRequests.objects.filter(
         status=status,
         elevator=elevator
-    )
+    ).order_by("reqTime")
+
+def get_ElevatorFromRequest(status, elevator):
+    return ElevatorFromRequests.objects.filter(
+        status=status,
+        elevator=elevator,
+    ).order_by("reqTime")
 
 def get_ElevatorForRequests_floor(status, elevator, floor):
     return ElevatorForRequests.objects.filter(
@@ -51,16 +60,19 @@ def get_ElevatorForRequests_floor(status, elevator, floor):
         floor_id=floor,
     )
 
+
 def get_ElevatorForRequests_floor_elevatorIsNull(floor):
     return ElevatorForRequests.objects.filter(
-            floor_id = floor,
-            elevator__isnull = True
-        )
+        floor_id=floor,
+        elevator__isnull=True
+    )
+
 
 def get_ElevatorForRequests_elevatorIsNull():
     return ElevatorForRequests.objects.filter(
-            elevator__isnull = True
-        )
+        elevator__isnull=True
+    )
+
 
 def get_DoorFunctions(action):
     return DoorFunctions.objects.get(
@@ -80,7 +92,7 @@ def get_ElevatorRequestStatus_Closed():
     )
 
 
-def get_ElevatorRequestStatus_Open():
+def getElevatorRequestStatusOpen():
     return ElevatorRequestStatus.objects.get(
         name="open"
     )
