@@ -4,14 +4,13 @@ from ..functionality import (
     get_ElevatorForRequests,
     get_ElevatorFunctionality,
     get_Floor_Count,
-    get_Moving, 
     get_ElevatorFromRequest
 )
 from ...models.models import ElevatorForRequests, ElevatorFromRequests
 from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
 
 
-def getRequestsFloors(model, requestStatus, elevator):
+def get_requests_floor(model, requestStatus, elevator):
     if model == ElevatorForRequests:
         return get_ElevatorForRequests(
             status=requestStatus,
@@ -27,10 +26,10 @@ def getRequestsFloors(model, requestStatus, elevator):
             "to_floor__name", flat=True
         )
 
-def getElevatorRequests(ElevatorRequestStatus, elevator):
+def get_elevator_requests(ElevatorRequestStatus, elevator):
     requests = []
 
-    forRequestsFloors = getRequestsFloors(
+    forRequestsFloors = get_requests_floor(
         model=ElevatorForRequests,
         requestStatus=ElevatorRequestStatus,
         elevator=elevator
@@ -38,7 +37,7 @@ def getElevatorRequests(ElevatorRequestStatus, elevator):
     if forRequestsFloors:
         requests += forRequestsFloors
 
-    fromRequestsFloors = getRequestsFloors(
+    fromRequestsFloors = get_requests_floor(
         model=ElevatorFromRequests,
         requestStatus=ElevatorRequestStatus,
         elevator=elevator
@@ -137,7 +136,7 @@ def list_nextDestination(data):
     elevator = get_Elevator(elevator=elevator)
     open = getElevatorRequestStatusOpen()
 
-    requests = getElevatorRequests(
+    requests = get_elevator_requests(
         ElevatorRequestStatus=open,
         elevator=elevator
     )
