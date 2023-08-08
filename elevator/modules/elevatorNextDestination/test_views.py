@@ -3,6 +3,7 @@ from rest_framework.test import APIRequestFactory
 from .views import ElevatorNextDestinationViewSet
 from unittest.mock import patch, PropertyMock
 from rest_framework import status
+# from ....elevator.modules.elevatorNextDestination.views
 
 class ElevatorNextDestinationViewSetTest(TestCase):
     def setUp(self):
@@ -17,7 +18,7 @@ class ElevatorNextDestinationViewSetTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch("elevator.modules.elevator.views.list_nextDestination")
+    @patch("elevator.modules.elevatorNextDestination.views.list_nextDestination")
     def test_list_whenDataNotFound(self, mock_list_nextDestination):
         data = {
             "elevator": "EL_3",
@@ -30,7 +31,7 @@ class ElevatorNextDestinationViewSetTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
-    @patch("elevator.modules.elevator.views.list_nextDestination")
+    @patch("elevator.modules.elevatorNextDestination.views.list_nextDestination")
     def test_list_whenDBError(self, mock_list_nextDestination):
         data = {
             "elevator": "EL_3",
@@ -43,8 +44,8 @@ class ElevatorNextDestinationViewSetTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @patch("elevator.modules.elevator.views.list_nextDestination")
-    @patch("elevator.modules.elevator.views.ElevatorNextDestinationSerializer")
+    @patch("elevator.modules.elevatorNextDestination.views.list_nextDestination")
+    @patch("elevator.modules.elevatorNextDestination.views.ElevatorNextDestinationSerializer")
     def test_list(self, mock_ElevatorNextDestinationSerializer, mock_list_nextDestination):
         data = {
             "elevator": "EL_3",

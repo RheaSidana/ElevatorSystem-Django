@@ -1,9 +1,9 @@
-from django.test import TestCase
 from rest_framework.test import APIRequestFactory
+from django.test import TestCase
 from rest_framework import status
 from .views import FulFillElevatorNextRequestsViewSet
 from unittest.mock import patch, PropertyMock
-
+from rest_framework import status
 
 class FullFilElevatorNextRequestsViewSetTest(TestCase):
     def setUp(self):
@@ -16,8 +16,8 @@ class FullFilElevatorNextRequestsViewSetTest(TestCase):
         response = view(request)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    @patch("elevator.modules.elevator.views.list_fullfilElevatorNextRequest")
+    
+    @patch("elevator.modules.fulFillElevatorsNextRequest.views.list_fulfillElevatorsNextRequest")
     def test_list_whenDBError(self, mock_list_fullfilElevatorNextRequest):
         request = self.factory.get('/FullFilElevatorNextRequests/')
         view = FulFillElevatorNextRequestsViewSet.as_view({'get': 'list'})
@@ -27,8 +27,8 @@ class FullFilElevatorNextRequestsViewSetTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @patch("elevator.modules.elevator.views.list_fullfilElevatorNextRequest")
-    @patch("elevator.modules.elevator.views.FullFilElevatorNextRequestsSerializer")
+    @patch("elevator.modules.fulFillElevatorsNextRequest.views.list_fulfillElevatorsNextRequest")
+    @patch("elevator.modules.fulFillElevatorsNextRequest.views.FulFillElevatorNextRequestsViewSet")
     def test_list(self, mock_FullFilElevatorNextRequestsSerializer, mock_list_fullfilElevatorNextRequest):
         expectedResponse = {
             "status": 200,
