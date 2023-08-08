@@ -12,21 +12,20 @@ from ..functionality import (
 requestCapacity = 8
 
 
-def is_elevatorExists(name):
-    return Elevator.objects.filter(name=name).exists()
+def is_elevator_exists(name):
+        return Elevator.objects.filter(name=name).exists()
 
-
-def create_ElevatorName(no):
+def create_elevator_name(no):
     return "EL_" + str(no)
 
 
-def create_Elevator(name, capacity):
+def create_elevator(name, capacity):
     return Elevator.objects.create(
         name=name, capacity=capacity, requestsCapacity=requestCapacity,
     )
 
 
-def create_ElevatorFunctionality(elevator):
+def create_elevator_functionality(elevator):
     return ElevatorFunctionality.objects.create(
         movement=get_Movements(action="Stop"),
         floor_no=get_Floor(name="FL_1"),
@@ -46,7 +45,7 @@ def create_elevators(data):
         Elevator.objects.all().delete()
 
     for i in range(1, no+1):
-        val = create_ElevatorName(no=i)
-        if not is_elevatorExists(name=val):
-            elevator = create_Elevator(name=val, capacity=peopleCapacity)
-            ele_func = create_ElevatorFunctionality(elevator=elevator)
+        val = create_elevator_name(no=i)
+        if not is_elevator_exists(name=val):
+            elevator = create_elevator(name=val, capacity=peopleCapacity)
+            ele_func = create_elevator_functionality(elevator=elevator)
