@@ -1,7 +1,7 @@
 from ...models.models import ElevatorRequestStatus, ElevatorFromRequests
 from ..elevatorFromRequest.functionality import assignFromRequest
 from ..functionality import get_Elevator
-from ..functionality import cal_Date, cal_ReqList
+from ..functionality import calculate_date, requests_list
 
 
 def create_fromRequest(data):
@@ -17,9 +17,9 @@ def create_fromRequest(data):
 def list_fromRequests(data):
     elevator = data["elevator"]
     elevator = get_Elevator(elevator=elevator)
-    of_date, next_date = cal_Date(convertFrom=data["date"])
+    of_date, next_date = calculate_date(convertFrom=data["date"])
 
-    req_list = cal_ReqList(
+    req_list = requests_list(
         model=ElevatorFromRequests,
         elevator=elevator,
         of_date=of_date,

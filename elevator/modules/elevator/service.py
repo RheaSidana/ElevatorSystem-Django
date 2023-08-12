@@ -5,7 +5,7 @@ from ..functionality import (
     get_Floor,
     get_Movements,
     get_Moving,
-    get_Operational_Status,
+    get_operational_status,
     get_DoorFunctions
 )
 
@@ -30,7 +30,7 @@ def create_elevator_functionality(elevator):
         movement=get_Movements(action="Stop"),
         floor_no=get_Floor(name="FL_1"),
         direction=get_Moving(direction="Stationary"),
-        operational_status=get_Operational_Status(status="Working"),
+        operational_status=get_operational_status(status="Working"),
         door_functionality=get_DoorFunctions(action="Close"),
         elevator=elevator,
         curr_req_count=0,

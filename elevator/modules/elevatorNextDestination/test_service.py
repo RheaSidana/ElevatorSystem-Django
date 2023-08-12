@@ -1,7 +1,6 @@
 from django.test import TestCase
 from unittest.mock import patch
 from .service import *
-# from ....elevator.modules.elevatorNextDestination.service
 
 
 class ElevatorNextDestinationTestCase(TestCase):
@@ -102,7 +101,7 @@ class ElevatorNextDestinationTestCase(TestCase):
         mock_is_difference.return_value = True
         mock_difference_between.return_value = 1
 
-        result = getNextDestinationOf(elevator=elevator_mock, elevatorsRequests=elevators_requests_mock)
+        result = get_next_destination_of(elevator=elevator_mock, elevatorsRequests=elevators_requests_mock)
 
         expected_result = {
             "elevator_name": "EL_1",

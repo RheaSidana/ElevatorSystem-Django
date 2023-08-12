@@ -1,424 +1,260 @@
-from ..functionality import getElevatorRequestStatusOpen
-from ..functionality import get_ElevatorRequestStatus_Closed
-from ...models.models import ElevatorForRequests
-from ..functionality import get_Floor
-from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
 from ..functionality import (
-    get_Floor_Count, get_ElevatorForRequests,
-    get_ElevatorForRequests_floor,
-    get_ElevatorForRequests_floor_elevatorIsNull
+    total_floors, get_ElevatorForRequests,
+    get_from_requests
 )
-from ..functionality import get_Operational_Status
+from .repository import *
 
 
-def closeForRequest(elevator, floor):
-    openReq = getElevatorRequestStatusOpen()
-    closeReq = get_ElevatorRequestStatus_Closed()
-    reqs = ElevatorForRequests.objects.filter(
-        elevator=elevator,
-        floor_id=floor,
-        status=openReq
-    )
-    # .update(
-    #     status=closeReq
-    # )
+def create_for_request_when_floor_in_from_request(
+        floor_id, status, elevator_functionality, people_count, fromReq):
 
-    peopleCount = 0
-    for r in reqs:
-        peopleCount += r.count_of_people
+    elevator = elevator_functionality.elevator
 
-    reqs.update(
-        status=closeReq
-    )
-    return peopleCount
+    if (elevator_functionality.curr_req_count == elevator.requestsCapacity):
+        return people_count, None
 
-
-def create_forRequest(reqID, floor_id, status, elevator, count_of_people):
-    return ElevatorForRequests.objects.create(
-        reqID=reqID,
-        floor_id=floor_id,
-        status=status,
-        elevator=elevator,
-        count_of_people=count_of_people
-    )
-
-
-def is_allAtTheSameFloor(list_of_elevator):
-    floor = list_of_elevator[0].floor_no
-    for elev in list_of_elevator:
-        if floor != elev.floor_no:
-            return False
-    return True
-
-
-def is_forRequests_exists():
-    return ElevatorForRequests.objects.exists()
-
-
-def count_forRequests():
-    return int(
-        ElevatorForRequests
-        .objects.all().order_by("reqTime")
-        .last().reqID.split("_")[1]
-    )
-
-
-def cal_forRequest_count():
-    if is_forRequests_exists():
-        count = count_forRequests() + 1
     else:
-        count = 1
-    return count
-
-
-def forRequest(elevator, floor_no, people_count, status, bufferCount):
-    if (elevator.curr_req_count >= elevator.elevator.requestsCapacity):
-        bufferCount = 0
-        return people_count, bufferCount, None
-    else:
-        if (bufferCount == elevator.elevator.capacity):
-            bufferCount = 0
-            return people_count, bufferCount, None
-
-        elev = elevator.elevator
-
-        forReq = cal_forRequest_create(
-            floor_id=floor_no,
-            elevator=elev,
+        for_request = create_for_request(
+            floor_id=floor_id,
             status=status,
-            peopleCount=people_count
+            elevator=elevator,
+            people_count=people_count
         )
+        buffer_count = elevator_functionality.curr_person_count - fromReq.count_of_people
 
-        if (bufferCount + people_count <= elev.capacity):
-            bufferCount += people_count
+        if (buffer_count + people_count <= elevator.requestsCapacity):
             people_count = 0
 
         else:
-            add = (elev.capacity-bufferCount)
-            people_count -= add
-            forReq.count_of_people = add
-            bufferCount = 0
-
-        elevator.curr_req_count += 1
-        elevator.save()
-        forReq.save()
-
-    return people_count, bufferCount, forReq
-
-
-def assignForRequestWhenAllAtSameFloor(list_of_elevators_func, data, status):
-    req_added = 0
-
-    list_Req = []
-
-    for elevFunc in list_of_elevators_func:
-        openReq = get_ElevatorForRequests(
-            status=status,
-            elevator=elevFunc.elevator
-        )
-        
-        bufferCount = cal_peopleCount(openReq)
-
-        for i in range(0, (len(data["floors"]))):
-            if i != req_added:
-                continue
-
-            openReq_ofFloor = ForRequestAlreadyExists(
-                floor=data["floors"][i],
-                elevator=elevFunc.elevator,
-                status=status
+            people_can_board_elevator = (
+                elevator.requestsCapacity - buffer_count)
+            people_count -= people_can_board_elevator
+            update_count_of_people(
+                for_request=for_request,
+                people_count=people_can_board_elevator
             )
 
-            if openReq_ofFloor.count() != 0:
-                list_Req += openReq_ofFloor
-                req_added += 1
-                continue
+        increment_curr_req_count(elevator_functionality)
 
-            peopleCount, bufferCount, forReq = forRequest(
-                elevator=elevFunc,
-                floor_no=data["floors"][i],
-                people_count=data["PeoplePerFloor"][i],
-                status=status,
-                bufferCount=bufferCount
-            )
-
-            if forReq is not None:
-                list_Req.append(forReq)
-
-            if peopleCount == 0:
-                req_added += 1
-            else:
-                data["PeoplePerFloor"][i] = peopleCount
-                break
-
-        if req_added == (len(data["floors"])):
-            break
-
-    return list_Req
+    return people_count, for_request
 
 
-def cal_forRequest_create(floor_id, elevator, status, peopleCount):
-    count = cal_forRequest_count()
-    floor = get_Floor(name=floor_id)
-    req_id = "FR_" + str(count)
-    return create_forRequest(
-        reqID=req_id,
-        floor_id=floor,
-        status=status,
-        elevator=elevator,
-        count_of_people=peopleCount
-    )
-
-
-def foundInFromRequest(floor_id, status, elevatorFunc, peopleCount, fromReq):
-    elev = elevatorFunc.elevator
-    if (elevatorFunc.curr_req_count == elev.requestsCapacity):
-        return peopleCount, None
-    else:
-        forReq = cal_forRequest_create(
-            floor_id=floor_id,
-            status=status,
-            elevator=elev,
-            peopleCount=peopleCount
-        )
-        bufferCount = elevatorFunc.curr_person_count - fromReq.count_of_people
-        if (bufferCount + peopleCount <= elev.requestsCapacity):
-            peopleCount = 0
-        else:
-            add = (elev.requestsCapacity - bufferCount)
-            peopleCount -= add
-            forReq.count_of_people = add
-
-        elevatorFunc.curr_req_count += 1
-        elevatorFunc.save()
-        forReq.save()
-    return peopleCount, forReq
-
-
-def assignForRequestIfElevatorAlreadyHasRequests(list_of_elevators, data, status):
-    list_req = []
-    for elevatorFunc in list_of_elevators:
-        elevator = elevatorFunc.elevator
-        list_fromReqs = get_AllOpenFromRequest(
+def return_for_request_if_elevator_already_has_from_requests(
+        elevator_functionality_list, data, status):
+    requests_list = []
+    for elevator_functionality in elevator_functionality_list:
+        elevator = elevator_functionality.elevator
+        from_requests_to_floor_list = get_from_requests(
             status=status,
             elevator=elevator,
+        ).values_list(
+            "to_floor", flat=True
         )
 
-        for req in list_fromReqs:
-            if req.to_floor in data["floors"]:
-                position = data["floors"].index(req)
-                peopleCount = data["PeoplePerFloor"][position]
+        for floor_request in from_requests_to_floor_list:
+            if floor_request in data["floors"]:
+                position = data["floors"].index(floor_request)
+                people_count = data["PeoplePerFloor"][position]
 
-                peopleCount, forReq = foundInFromRequest(
-                    floor_id=req.to_floor,
+                people_count, for_request = create_for_request_when_floor_in_from_request(
+                    floor_id=floor_request,
                     status=status,
-                    elevatorFunc=elevatorFunc,
-                    peopleCount=peopleCount,
-                    fromReq=req,
+                    elevator_functionality=elevator_functionality,
+                    people_count=people_count,
+                    fromReq=floor_request,
                 )
 
-                if forReq is not None:
-                    list_req.append(forReq)
+                if for_request is not None:
+                    requests_list.append(for_request)
 
-                if peopleCount != 0:
-                    data["PeoplePerFloor"][position] = peopleCount
+                if people_count != 0:
+                    data["PeoplePerFloor"][position] = people_count
                 else:
                     data["floors"].pop(position)
                     data["PeoplePerFloor"].pop(position)
 
-    return data, list_req
+    return data, requests_list
 
 
-def cal_peopleCount(reqs):
-    count = 0
-    if reqs:
-        for r in reqs:
-            count += r.count_of_people
-    return count
+def min_diff_btw_elevator_and_requested_floor(
+        elevator_functionality, floor_no, bufferCount, min_diff, open_requests=0):
 
-
-def findMinDiff(elevator, floor_no, bufferCount, min, openReq=0):
-    if (elevator.curr_req_count >= elevator.elevator.requestsCapacity):
-        return min
+    elevator = elevator_functionality.elevator
+    if (elevator_functionality.curr_req_count >= elevator.requestsCapacity):
+        return min_diff
     else:
-        elev = elevator.elevator
-        if (bufferCount == elev.capacity):
-            return min
+        if (bufferCount == elevator.capacity):
+            return min_diff
         else:
-            if not openReq or (openReq and len(openReq) < elev.requestsCapacity):
+            if not open_requests or (
+                    open_requests and
+                    len(open_requests) < elevator.requestsCapacity):
                 floorNo_req = int(floor_no.split("_")[1])
-                floorNo_elev = int(elevator.floor_no.name.split("_")[1])
+                floorNo_elev = int(
+                    elevator_functionality.floor_no.name.split("_")[1])
 
-                if min > abs(floorNo_req - floorNo_elev):
-                    min = floorNo_req - floorNo_elev
+                if min_diff > abs(floorNo_req - floorNo_elev):
+                    min_diff = floorNo_req - floorNo_elev
 
-    return min
+    return min_diff
 
 
-def forRequestToElevator(elevatorFunc, floor_no, people_count, status, bufferCount):
-    if elevatorFunc is None:
-        elev = None
-        forReq = cal_forRequest_create(
+def create_for_request_when_new_request(
+        elevator_functionality, floor_no, people_count, status, buffer_count):
+    # when no elevator is available to take request
+    if elevator_functionality is None:
+        elevator = None
+        for_request = create_for_request(
             floor_id=floor_no,
-            elevator=elev,
+            elevator=elevator,
             status=status,
-            peopleCount=people_count
+            people_count=people_count
         )
-        return 0, forReq
-    if (elevatorFunc.curr_req_count >= elevatorFunc.elevator.requestsCapacity):
-        bufferCount = 0
+        return 0, for_request
+
+    # when elevator is available to take request
+    elevator = elevator_functionality.elevator
+    if (elevator_functionality.curr_req_count >= elevator.requestsCapacity):
+        buffer_count = 0
         return people_count, None
     else:
-        if (bufferCount == elevatorFunc.elevator.capacity):
-            bufferCount = 0
+        # when no capacity
+        if (buffer_count == elevator.capacity):
+            buffer_count = 0
             return people_count, None
-        elev = elevatorFunc.elevator
-        forReq = cal_forRequest_create(
+        # when has capacity
+
+        for_request = create_for_request(
             floor_id=floor_no,
-            elevator=elev,
+            elevator=elevator,
             status=status,
-            peopleCount=people_count
+            people_count=people_count
         )
 
-        if (bufferCount + people_count <= elev.capacity):
-            bufferCount += people_count
+        if (buffer_count + people_count <= elevator.capacity):
+            buffer_count += people_count
             people_count = 0
 
         else:
-            add = (elev.capacity-bufferCount)
-            bufferCount = 0
-            people_count -= add
-            forReq.count_of_people = add
-        elevatorFunc.curr_req_count += 1
-        elevatorFunc.save()
-        forReq.save()
+            people_can_board_elevator = (elevator.capacity - buffer_count)
+            buffer_count = 0
+            people_count -= people_can_board_elevator
+            update_count_of_people(
+                for_request=for_request,
+                people_count=people_can_board_elevator
+            )
 
-    return people_count, forReq
+        increment_curr_req_count(elevator_functionality)
 
-
-def ForRequestAlreadyExists(floor, elevator, status):
-    floor = get_Floor(
-        name=floor
-    )
-    openReq_Floor = get_ElevatorForRequests_floor(
-        status=status,
-        elevator=elevator,
-        floor=floor
-    )
-
-    return openReq_Floor
+    return people_count, for_request
 
 
-def assignForRequestToTheNearestElevatorPossible(list_of_elevators_func, data, status):
-    list_req = []
+def create_for_request_to_the_nearest_elevator_possible(
+        elevator_functionality_list, data, status):
+    requests_list = []
     buffCount = 0
     i = 0
-    length = len(data["floors"])
-    isReqFullFill = True
+    req_length = len(data["floors"])
+    is_req_added_successfully = True
     req_added = 0
-    while i <= (length-1):
-        if req_added == length:
+
+    while i <= (req_length-1):
+        if req_added == req_length:
             break
+
         if i != req_added:
             continue
-        minDiff = get_Floor_Count()
-        minElev = None
-        found = False
 
-        # if reqest exist with null elevator 
-        # it should not add 1 more req
-        floor = get_Floor(name=data["floors"][i])
-        req = get_ElevatorForRequests_floor_elevatorIsNull(
-            floor=floor,
+        # if reqest exist with null elevator
+        req_with_null_elevator = for_requests_of_floor_when_elevator_is_null(
+            floor=data["floors"][i],
         )
-        if req.count() != 0:
+        if req_with_null_elevator.count() != 0:
             req_added += 1
+            i += 1
             continue
 
-        for elevatorFunc in list_of_elevators_func:
-            if req_added == length:
+        # if request is new request
+        min_diff_btw_elevator_and_floor = total_floors()
+        elevator_functionality_of_min_diff = None
+        req_found = False
+
+        for elevator_functionality in elevator_functionality_list:
+            if req_added == req_length:
                 break
 
-            elev = elevatorFunc.elevator
-            if isReqFullFill == True:
+            elevator = elevator_functionality.elevator
+
+            if is_req_added_successfully == True:
                 # if request already exists = continue
-                openReq_Floor = ForRequestAlreadyExists(
+                open_req_floor = get_for_requests_of_floor(
                     floor=data["floors"][i],
-                    elevator=elev,
+                    elevator=elevator,
                     status=status
                 )
-                if openReq_Floor.count() != 0:
+
+                if open_req_floor.count() != 0:
                     # list_req.append(openReq_Floor)
-                    list_req += openReq_Floor
+                    requests_list += open_req_floor
                     req_added += 1
                     i += 1
-                    found = True
+                    req_found = True
                     break
 
             # if elevFunc.oprStat is not working = continue
-            oprStatus = get_Operational_Status(
-                status="Working"
-            )
-
-            if elevatorFunc.operational_status != oprStatus:
+            if elevator_functionality.operational_status.value != "Working":
                 continue
 
-            # if elevator has any open req = count expected people
-            # if elevator can take the request/capacity
-            # if nearest then
-            openReq = get_ElevatorForRequests(
+            # if elevator has any open req
+            open_requests = get_ElevatorForRequests(
                 status=status,
-                elevator=elev
+                elevator=elevator
             )
 
-            bufferCount = cal_peopleCount(openReq)
-            if bufferCount == elev.capacity:
+            # cal expected capacity of elevator
+            bufferCount = sum(open_requests.values_list(
+                "count_of_people", flat=True
+            ))
+            # if not capacity to add people to the elevator
+            if bufferCount == elevator.capacity:
                 continue
 
-            if minElev is None:
-                minElev = elevatorFunc
+            if elevator_functionality_of_min_diff is None:
+                elevator_functionality_of_min_diff = elevator_functionality
 
-            diff = findMinDiff(
-                elevator=elevatorFunc,
+            diff = min_diff_btw_elevator_and_requested_floor(
+                elevator_functionality=elevator_functionality,
                 floor_no=data["floors"][i],
                 bufferCount=bufferCount,
-                min=minDiff,
-                openReq=openReq
+                min_diff=min_diff_btw_elevator_and_floor,
+                open_requests=open_requests
             )
 
-            if diff < minDiff:
-                minDiff = diff
-                minElev = elevatorFunc
+            if diff < min_diff_btw_elevator_and_floor:
+                min_diff_btw_elevator_and_floor = diff
+                elevator_functionality_of_min_diff = elevator_functionality
                 buffCount = bufferCount
 
-        if not found:
-
-            peopleCount, req = forRequestToElevator(
-                elevatorFunc=minElev,
+        if not req_found:
+            peopleCount, req_with_null_elevator = create_for_request_when_new_request(
+                elevator_functionality=elevator_functionality_of_min_diff,
                 floor_no=data["floors"][i],
                 people_count=data["PeoplePerFloor"][i],
                 status=status,
-                bufferCount=buffCount,
+                buffer_count=buffCount,
             )
 
-            if req is not None:
-                list_req.append(req)
+            if req_with_null_elevator is not None:
+                requests_list.append(req_with_null_elevator)
 
             if peopleCount != 0:
                 data["PeoplePerFloor"][i] = peopleCount
-                isReqFullFill = False
+                is_req_added_successfully = False
             else:
                 i += 1
                 req_added += 1
 
-        if req_added == length:
+        if req_added == req_length:
             break
 
-    return list_req
-
-
-def get_AllForRequests(elevator, status):
-    return ElevatorForRequests.objects.filter(
-        elevator=elevator,
-        status=status,
-    )
+    return requests_list

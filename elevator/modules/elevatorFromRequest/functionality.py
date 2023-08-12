@@ -1,9 +1,9 @@
-from ..functionality import getElevatorRequestStatusOpen, get_ElevatorRequestStatus_Closed
+from ..functionality import get_elevator_request_status_is_open, get_ElevatorRequestStatus_Closed
 from ...models.models import ElevatorFromRequests
 from ..functionality import get_Elevator, get_ElevatorFunctionality, get_Floor
 
 def closeFromRequest(elevator, to_floor):
-    openReq = getElevatorRequestStatusOpen()
+    openReq = get_elevator_request_status_is_open()
     closeReq = get_ElevatorRequestStatus_Closed()
     reqs = ElevatorFromRequests.objects.filter(
         elevator=elevator,
@@ -23,11 +23,11 @@ def closeFromRequest(elevator, to_floor):
     )
     return peopleCount
 
-def get_AllOpenFromRequest(status, elevator):
-    return ElevatorFromRequests.objects.filter(
-        status=status,
-        elevator=elevator,
-    )
+# def get_all_open_from_request(status, elevator):
+#     return ElevatorFromRequests.objects.filter(
+#         status=status,
+#         elevator=elevator,
+#     )
 
 def get_AllOpenFromRequestFloor(status, elevator, to_floor):
     return ElevatorFromRequests.objects.filter(

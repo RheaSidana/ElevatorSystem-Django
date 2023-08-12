@@ -1,13 +1,12 @@
 from ..functionality import (
     get_Elevator,
-    getElevatorRequestStatusOpen,
+    get_elevator_request_status_is_open,
     get_ElevatorForRequests,
     get_ElevatorFunctionality,
-    get_Floor_Count,
-    get_ElevatorFromRequest
+    total_floors,
+    get_from_requests
 )
 from ...models.models import ElevatorForRequests, ElevatorFromRequests
-from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
 
 
 def get_requests_floor(model, requestStatus, elevator):
@@ -19,7 +18,7 @@ def get_requests_floor(model, requestStatus, elevator):
             "floor_id__name", flat=True
         )
     elif model == ElevatorFromRequests:
-        return get_ElevatorFromRequest(
+        return get_from_requests(
             status=requestStatus,
             elevator=elevator
         ).values_list(
@@ -75,14 +74,14 @@ def is_differenceBetweenLessThanMinDifference(toFloor, currentFloor, minDifferen
     ) < minDifference
 
 
-def getNextDestinationOf(elevator, elevatorsRequests):
+def get_next_destination_of(elevator, elevatorsRequests):
     elevFunc = get_ElevatorFunctionality(elevator=elevator)
 
     currentFloor = elevFunc.floor_no.name
     UpDirectionList = []
     downDirectionList = []
 
-    minDifference = get_Floor_Count()
+    minDifference = total_floors()
     nextDestination = ""
     nextDirection = "Stationary"
 
@@ -134,7 +133,7 @@ def getNextDestinationOf(elevator, elevatorsRequests):
 def list_nextDestination(data):
     elevator = data["elevator"]
     elevator = get_Elevator(elevator=elevator)
-    open = getElevatorRequestStatusOpen()
+    open = get_elevator_request_status_is_open()
 
     requests = get_elevator_requests(
         ElevatorRequestStatus=open,
@@ -142,7 +141,7 @@ def list_nextDestination(data):
     )
 
     try:
-        obj = getNextDestinationOf(
+        obj = get_next_destination_of(
             elevator=elevator,
             elevatorsRequests=requests
         )

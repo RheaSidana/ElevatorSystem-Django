@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from ...models.models import ElevatorForRequests
 from ...serializer.modelSerializers.serializers import ElevatorForRequestsSerializer
-from .service import create_forRequest, list_forRequests
+from .service import create_for_request, list_forRequests
 
 
 class RequestForElevatorViewSet(viewsets.ModelViewSet):
@@ -27,7 +27,7 @@ class RequestForElevatorViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            list_req = create_forRequest(data=data)
+            list_req = create_for_request(data=data)
         except Exception as ex:
             return Response({
                 "status": 500,

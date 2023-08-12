@@ -21,7 +21,7 @@ def get_ElevatorFunctionality(elevator):
     )
 
 
-def get_AllElevatorFunctions():
+def get_all_elevator_functionality():
     return ElevatorFunctionality.objects.all().order_by("id")
 
 
@@ -31,11 +31,11 @@ def get_Floor(name):
     )
 
 
-def get_Floor_Count():
+def total_floors():
     return Floor.objects.all().count()
 
 
-def get_Operational_Status(status):
+def get_operational_status(status):
     return Operational_Status.objects.get(
         value=status
     )
@@ -47,26 +47,11 @@ def get_ElevatorForRequests(status, elevator):
         elevator=elevator
     ).order_by("reqTime")
 
-def get_ElevatorFromRequest(status, elevator):
+def get_from_requests(status, elevator):
     return ElevatorFromRequests.objects.filter(
         status=status,
         elevator=elevator,
     ).order_by("reqTime")
-
-def get_ElevatorForRequests_floor(status, elevator, floor):
-    return ElevatorForRequests.objects.filter(
-        status=status,
-        elevator=elevator,
-        floor_id=floor,
-    )
-
-
-def get_ElevatorForRequests_floor_elevatorIsNull(floor):
-    return ElevatorForRequests.objects.filter(
-        floor_id=floor,
-        elevator__isnull=True
-    )
-
 
 def get_ElevatorForRequests_elevatorIsNull():
     return ElevatorForRequests.objects.filter(
@@ -92,7 +77,7 @@ def get_ElevatorRequestStatus_Closed():
     )
 
 
-def getElevatorRequestStatusOpen():
+def get_elevator_request_status_is_open():
     return ElevatorRequestStatus.objects.get(
         name="open"
     )
@@ -114,7 +99,7 @@ def get_Elevator_Count():
     return Elevator.objects.count()
 
 
-def cal_Date(convertFrom):
+def calculate_date(convertFrom):
     of_date = datetime.strptime(convertFrom, "%Y-%m-%d").date()
     of_date = datetime.combine(of_date, datetime.min.time())
     of_date = timezone.make_aware(of_date, timezone.utc)
@@ -122,7 +107,7 @@ def cal_Date(convertFrom):
     return of_date, next_date
 
 
-def cal_ReqList(model, elevator, of_date, next_date):
+def requests_list(model, elevator, of_date, next_date):
     return model.objects.filter(
         Q(elevator=elevator) &
         Q(reqTime__gt=of_date) &

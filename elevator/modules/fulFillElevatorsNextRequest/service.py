@@ -1,14 +1,14 @@
-from elevator.modules.elevatorForRequests.functionality import closeForRequest
+from .repository import closeForRequest
 from elevator.modules.elevatorFromRequest.functionality import closeFromRequest
 from ..functionality import (
-    get_AllElevatorFunctions,
+    get_all_elevator_functionality,
     get_Movements,
     get_DoorFunctions,
     get_Moving, 
     get_Floor,
     get_ElevatorForRequests_elevatorIsNull
 )
-from ..elevatorForRequests.service import create_forRequest
+from ..elevatorForRequests.service import create_for_request
 from ..elevatorNextDestination.service import list_nextDestination
 
 def cal_FulFill_Direction(direction, elevatorFunctionality, steps):
@@ -192,12 +192,12 @@ def assignForRequestIfElevatorIsNull():
                 req.count_of_people
             )
             req.delete()
-            create_forRequest(data=data)
+            create_for_request(data=data)
 
 
 def list_fulfillElevatorsNextRequest():
     list_obj = []
-    elevFuncs = get_AllElevatorFunctions()
+    elevFuncs = get_all_elevator_functionality()
 
     for elevatorFunc in elevFuncs:
         ob = fulfill(elevatorFunctionality=elevatorFunc)

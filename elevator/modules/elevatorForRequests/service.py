@@ -1,51 +1,47 @@
 from ...models.models import ElevatorForRequests
 from ..functionality import (
-    cal_Date,
-    cal_ReqList,
+    calculate_date,
+    requests_list,
     get_Elevator,
-    getElevatorRequestStatusOpen,
-    get_AllElevatorFunctions
+    get_elevator_request_status_is_open,
+    get_all_elevator_functionality
 )
 from .functionality import (
-    assignForRequestWhenAllAtSameFloor,
-    assignForRequestIfElevatorAlreadyHasRequests,
-    assignForRequestToTheNearestElevatorPossible,
-    is_allAtTheSameFloor
+    return_for_request_if_elevator_already_has_from_requests,
+    create_for_request_to_the_nearest_elevator_possible,
 )
 
 
-def create_forRequest(data):
-    status = getElevatorRequestStatusOpen()
-    list_of_elevators = get_AllElevatorFunctions()
-    if is_allAtTheSameFloor(list_of_elevators):
-        # list_forReq ElevatorForRequestsSerializer
-        list_forReq = assignForRequestWhenAllAtSameFloor(
-            list_of_elevators, data, status
-        )
-    else:
-        data, list_forReq = assignForRequestIfElevatorAlreadyHasRequests(
-            list_of_elevators, data, status
-        )
-        if data != {}:
-            list_forReq = assignForRequestToTheNearestElevatorPossible(
-                list_of_elevators, data, status
-            )
+def create_for_request(data):
+    status = get_elevator_request_status_is_open()
+    elevator_functionality_list = get_all_elevator_functionality()
 
-    return list_forReq
+    data, elevator_for_requests_list = return_for_request_if_elevator_already_has_from_requests(
+        elevator_functionality_list=elevator_functionality_list, 
+        data=data, 
+        status=status
+    )
+
+    if data:
+        elevator_for_requests_list = create_for_request_to_the_nearest_elevator_possible(
+            elevator_functionality_list=elevator_functionality_list, 
+            data=data, 
+            status=status
+        )
+
+    return elevator_for_requests_list
 
 
 def list_forRequests(data):
-    elevator = data["elevator"]
-    elevator = get_Elevator(elevator=elevator)
+    elevator_name = data["elevator"]
+    elevator = get_Elevator(elevator=elevator_name)
 
     of_date = data["date"]
-    of_date, next_date = cal_Date(convertFrom=of_date)
+    of_date, next_date = calculate_date(convertFrom=of_date)
 
-    req_list = cal_ReqList(
+    return requests_list(
         model=ElevatorForRequests,
         elevator=elevator,
         of_date=of_date,
         next_date=next_date
     )
-
-    return req_list

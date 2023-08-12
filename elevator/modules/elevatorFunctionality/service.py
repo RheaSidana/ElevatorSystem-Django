@@ -1,6 +1,6 @@
 from ..functionality import (
     get_ElevatorFunctionality,
-    get_Operational_Status,
+    get_operational_status,
     get_DoorFunctions
 )
 from .functionality import (
@@ -15,7 +15,7 @@ def list_elevFuncMoving(data):
 
 
 def create_elevFuncOperational(data):
-    oprStatus = get_Operational_Status(status=data["status"])
+    oprStatus = get_operational_status(status=data["status"])
 
     elevFunc = get_ElevatorFunctionality(elevator=data["elevator"])
 

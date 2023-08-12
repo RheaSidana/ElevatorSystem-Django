@@ -1,25 +1,23 @@
-from ..elevatorFromRequest.functionality import get_AllOpenFromRequest
-from ..elevatorForRequests.functionality import (
-    get_AllForRequests,
-)
 from ..elevatorForRequests.service import (
-    create_forRequest,
+    create_for_request,
 )
 from ..functionality import (
     get_Floor,
     get_ElevatorRequestStatus_Closed,
-    getElevatorRequestStatusOpen,
+    get_elevator_request_status_is_open,
     get_Movements,
     get_DoorFunctions,
     get_Moving,
+    get_from_requests,
+    get_ElevatorForRequests
 )
 from ..fulFillElevatorsNextRequest.service import fulfill
 
 
 def updateFromRequests(elevatorFunctionality, floor_no):
-    status = getElevatorRequestStatusOpen()
+    status = get_elevator_request_status_is_open()
 
-    allFromReq = get_AllOpenFromRequest(
+    allFromReq = get_from_requests(
         status=status,
         elevator=elevatorFunctionality.elevator
     )
@@ -35,8 +33,8 @@ def updateFromRequests(elevatorFunctionality, floor_no):
 
 
 def updateForRequests(elevatorFunctionality):
-    status = getElevatorRequestStatusOpen()
-    allForReq = get_AllForRequests(
+    status = get_elevator_request_status_is_open()
+    allForReq = get_ElevatorForRequests(
         elevator=elevatorFunctionality.elevator,
         status=status,
     )
@@ -53,7 +51,7 @@ def updateForRequests(elevatorFunctionality):
             data["PeoplePerFloor"].append(req.count_of_people)
 
         if data["floors"] != []:
-            create_forRequest(data=data)
+            create_for_request(data=data)
 
     return
 
