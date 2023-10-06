@@ -155,7 +155,7 @@ python manage.py test elevator
 </a>
 
 <br/>
-<a href="[https://documenter.getpostman.com/view/28378586/2s9XxyRDnr](https://drive.google.com/drive/folders/1xRWzTSe5S97YSzpAv0qpzyVkmAP5byqa?usp=sharing)https://drive.google.com/drive/folders/1xRWzTSe5S97YSzpAv0qpzyVkmAP5byqa?usp=sharing">
+<a href="https://drive.google.com/drive/folders/1xRWzTSe5S97YSzpAv0qpzyVkmAP5byqa?usp=sharing">
     Video Description of the APIs
 </a>
 
